@@ -142,6 +142,7 @@ body {
   overflow: hidden; /* 스크롤바 제거 */
   overflow-x: hidden;
   overflow-y: hidden;
+
 }
 
 .add-notes-btn {

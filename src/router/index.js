@@ -3,6 +3,8 @@ import MapPage from '@/views/Map.vue'
 import Notice from '@/views/Notice.vue'
 import Board from '@/components/Board.vue'
 import BoardForm from '@/components/BoardForm.vue'
+import MainPage from '@/views/Main.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,6 +13,11 @@ const router = createRouter({
       path: '/map',
       name: 'map',
       component: MapPage
+    },
+    {
+      path: '/',
+      name: 'main',
+      component: MainPage
     },
     {
       path: '/notice',
