@@ -3,6 +3,13 @@ import { usePlaceStore } from '@/stores/placeStore'
 import { onMounted, ref, watch } from 'vue'
 import KakaoMapSearch from '@/components/KakaoMapSearch.vue'
 import Chat from '@/components/Chat.vue'
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const navigateToBoard = () => {
+  router.push({ name: 'boardList' });
+}
 
 const mapContainer = ref(null) // 지도를 담을 ref 생성
 import { storeToRefs } from 'pinia'
@@ -122,9 +129,7 @@ function displayInfowindow(marker, place) {
     >
       <KakaoMapSearch @update-location="handleLocationUpdate"></KakaoMapSearch>
       <!-- 버튼 추가 -->
-      <button class="add-notes-btn" style="position: absolute; right: -120px; top: 0">
-        게시글
-      </button>
+      <button class="add-notes-btn" @click="navigateToBoard" style="position: absolute; right: -120px; top: 0;">게시글</button>
     </div>
     <div
         style="position: absolute; top: 430px; left: 20px; width: 350px; height: 500px; z-index: 5000"
