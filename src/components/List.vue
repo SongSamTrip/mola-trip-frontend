@@ -9,34 +9,110 @@ const store = {
     items: [
       {
         id: "1",
-        text: "One",
+        address_name: "제주특별자치도 서귀포시 색달동 2132-2",
+        category_group_name: "음식점",
+        phone: "0507-1386-7060",
+        place_name: "밥",
+        place_url: "http://place.map.kakao.com/1890778114",
+        road_address_name: "제주특별자치도 서귀포시 색달로 10",
+        x: "126.40610781515082",
+        y: "33.25884970372605"
       },
-      ...Array.from({length: 10}, (_, i) => ({
-        id: `${i + 2}`,
-        text: `Item ${i + 2}`,
-      })),
-    ] as { id: string; text: string }[],
-    fruits: [
       {
-        id: "a",
-        text: "Apple",
+        id: "2",
+        address_name: "제주특별자치도 제주시 이호일동 651-3",
+        category_group_name: "음식점",
+        phone: "064-746-2222",
+        place_name: "국",
+        place_url: "http://place.map.kakao.com/21455793",
+        road_address_name: "제주특별자치도 제주시 항골남길 46",
+        x: "126.45914433997106",
+        y: "33.498577203781664"
       },
-      ...Array.from({length: 10}, (_, i) => ({
-        id: `${String.fromCharCode(98 + i)}`,
-        text: `Fruit ${String.fromCharCode(98 + i)}`,
-      })),
-    ] as { id: string; text: string }[],
+      {
+        id: "3",
+        address_name: "제주특별자치도 서귀포시 색달동 2132-2",
+        category_group_name: "음식점",
+        phone: "0507-1386-7060",
+        place_name: "김치",
+        place_url: "http://place.map.kakao.com/1890778114",
+        road_address_name: "제주특별자치도 서귀포시 색달로 10",
+        x: "126.40610781515082",
+        y: "33.25884970372605"
+      },
+      {
+        id: "4",
+        address_name: "제주특별자치도 제주시 이호일동 651-3",
+        category_group_name: "음식점",
+        phone: "064-746-2222",
+        place_name: "물",
+        place_url: "http://place.map.kakao.com/21455793",
+        road_address_name: "제주특별자치도 제주시 항골남길 46",
+        x: "126.45914433997106",
+        y: "33.498577203781664"
+      },
+    ],
   },
-}
+};
+
+const store2 = {
+  elements: {
+    items2: [
+      {
+        id: "1",
+        address_name: "제주특별자치도 서귀포시 색달동 2132-2",
+        category_group_name: "음식점",
+        phone: "0507-1386-7060",
+        place_name: "버거",
+        place_url: "http://place.map.kakao.com/1890778114",
+        road_address_name: "제주특별자치도 서귀포시 색달로 10",
+        x: "126.40610781515082",
+        y: "33.25884970372605"
+      },
+      {
+        id: "2",
+        address_name: "제주특별자치도 제주시 이호일동 651-3",
+        category_group_name: "음식점",
+        phone: "064-746-2222",
+        place_name: "피자",
+        place_url: "http://place.map.kakao.com/21455793",
+        road_address_name: "제주특별자치도 제주시 항골남길 46",
+        x: "126.45914433997106",
+        y: "33.498577203781664"
+      },
+      {
+        id: "3",
+        address_name: "제주특별자치도 서귀포시 색달동 2132-2",
+        category_group_name: "음식점",
+        phone: "0507-1386-7060",
+        place_name: "치킨",
+        place_url: "http://place.map.kakao.com/1890778114",
+        road_address_name: "제주특별자치도 서귀포시 색달로 10",
+        x: "126.40610781515082",
+        y: "33.25884970372605"
+      },
+      {
+        id: "4",
+        address_name: "제주특별자치도 제주시 이호일동 651-3",
+        category_group_name: "음식점",
+        phone: "064-746-2222",
+        place_name: "터키",
+        place_url: "http://place.map.kakao.com/21455793",
+        road_address_name: "제주특별자치도 제주시 항골남길 46",
+        x: "126.45914433997106",
+        y: "33.498577203781664"
+      },
+    ],
+  },
+};
+
 
 const elements = computed(() => {
   return store.elements.items;
 });
-
-const fruits = computed(() => {
-  return store.elements.fruits;
+const elements2 = computed(() => {
+  return store2.elements.items2;
 });
-
 const sortable = ref<InstanceType<typeof Sortable> | null>(null);
 
 const logEvent = (evt: Event, evt2?: Event) => {
@@ -98,6 +174,7 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
 
 <template>
   <main>
+    <div style="margin-top: 5px; margin-left: 5px">본리스트</div>
     <div class="wrapper">
       <Sortable ref="sortable" :list="elements" item-key="id" :options="options" @change="logEvent" @choose="logEvent"
                 @unchoose="logEvent" @start="logEvent" @end="logEvent" @add="onAdd($event, 'items')"
@@ -106,22 +183,32 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
                 @move="logEvent" @clone="logEvent">
         <template #item="{ element }">
           <div :key="element.id" class="draggable">
-            {{ element.text }}
+            {{ element.place_name }}
+
           </div>
+
         </template>
       </Sortable>
-<!--      <div>&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</div>-->
-<!--      <Sortable :list="fruits" item-key="id" :options="options" @change="logEvent" @choose="logEvent"-->
-<!--                @unchoose="logEvent" @start="logEvent" @end="logEvent" @add="onAdd($event, 'items')"-->
-<!--                @update="onUpdate($event, 'fruits')" @sort="logEvent" @remove="onRemove($event, 'items')"-->
-<!--                @filter="logEvent" @move="logEvent" @clone="logEvent">-->
-<!--        <template #item="{ element }">-->
-<!--          <div :key="element.id" class="draggable">-->
-<!--            {{ element.text }}-->
-<!--          </div>-->
-<!--        </template>-->
-<!--      </Sortable>-->
+
     </div>
+    <div style="margin-top: 5px; margin-left: 5px">부리스트</div>
+    <div class="wrapper">
+      <Sortable ref="sortable" :list="elements2" item-key="id" :options="options" @change="logEvent" @choose="logEvent"
+                @unchoose="logEvent" @start="logEvent" @end="logEvent" @add="onAdd($event, 'items')"
+                @update="onUpdate($event, 'items')" @sort="logEvent" @remove="onRemove($event, 'items')"
+                @filter="logEvent"
+                @move="logEvent" @clone="logEvent">
+        <template #item="{ element }">
+          <div :key="element.id" class="draggable">
+            {{ element.place_name }}
+
+          </div>
+
+        </template>
+      </Sortable>
+    </div>
+
+
   </main>
 </template>
 
