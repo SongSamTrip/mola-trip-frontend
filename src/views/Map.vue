@@ -4,6 +4,7 @@ import { onMounted, ref, watch } from 'vue'
 import KakaoMapSearch from '@/components/KakaoMapSearch.vue'
 import Chat from '@/components/Chat.vue'
 import { useRouter } from 'vue-router';
+import Draggable from '@/components/List.vue';
 
 const router = useRouter();
 
@@ -125,7 +126,7 @@ function displayInfowindow(marker, place) {
 <template>
   <div ref="mapContainer" style="width: 100vw; height: 100vh">
     <div
-        style="position: absolute; top: 20px; left: 20px; width: 350px; height: 400px; z-index: 5000"
+        style="position: absolute; top: 0px; left: 20px; width: 350px; height: 400px; z-index: 5000"
     >
       <KakaoMapSearch @update-location="handleLocationUpdate"></KakaoMapSearch>
       <!-- 버튼 추가 -->
@@ -135,6 +136,16 @@ function displayInfowindow(marker, place) {
         style="position: absolute; top: 430px; left: 20px; width: 350px; height: 500px; z-index: 5000"
     >
       <Chat/>
+    </div>
+    <div style="opacity: 0.8;  border-radius: 20px; margin-top: 0px; margin-right: 20px;
+ background-color: white; position: absolute; top: 20px; right: 20px; width: 300px; height: 850px; z-index: 5000;
+overflow: hidden;">
+      <div style="margin-top: 5px; margin-left: 5px">본리스트</div>
+      <Draggable>
+      </Draggable>
+      <div style="margin-left: 5px;">부리스트</div>
+      <Draggable>
+      </Draggable>
     </div>
   </div>
 </template>
