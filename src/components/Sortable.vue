@@ -90,27 +90,36 @@ watch(containerRef, (newContainer) => {
         setTimeout(() => {
           isDragging.value = false;
           emit("end", event);
-          console.log('Current props:', props);
         });
       },
     });
   }
 });
 
-// options가 변경되면 Sortable 인스턴스 업데이트
+// Vue의 watch 함수를 사용하여 props.options를 감시합니다.
 watch(
+    // 감시할 대상은 props.options입니다.
     () => props.options,
+    // props.options가 변경될 때 실행될 콜백 함수입니다.
     (options) => {
+      // options를 콘솔에 출력합니다.
+
+      // options가 존재하고, sortable 인스턴스가 초기화된 경우에만 실행합니다.
       if (options && sortable.value) {
+        // options 객체의 모든 속성을 순회합니다.
+
+
         for (const property in options) {
+          // sortable 인스턴스의 옵션을 업데이트합니다.
           sortable.value.option(
-              property as keyof SortableOptionsProp,
-              options[property as keyof SortableOptionsProp]
+              property as keyof SortableOptionsProp, // 옵션의 키
+              options[property as keyof SortableOptionsProp] // 옵션의 값
           );
         }
       }
     }
 );
+
 
 // 컴포넌트가 언마운트될 때 정리 작업을 수행
 onUnmounted(() => {

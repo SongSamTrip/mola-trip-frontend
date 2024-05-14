@@ -25,6 +25,7 @@ function searchPlaces() {
   ps.keywordSearch(keyword.value, placesSearchCB)
 }
 
+
 function placesSearchCB(data, status, pagi) {
   const placeStore = usePlaceStore()  // 스토어 접근
 
@@ -61,6 +62,20 @@ function goToMap(url) {
 function sendLocation(place) {
   // alert(place.x + " " + place.y)
   emit('update-location', { x: place.x, y: place.y });
+}
+
+
+function addItem(place) {
+  console.log(place.place_name)
+  alert(place.place_name)
+
+  const newDiv = document.createElement('div');
+  newDiv.className = 'draggable';
+  newDiv.textContent = place.place_name;
+  newDiv.setAttribute('data-v-b7ac1dbf','')
+  const selectorElement = document.querySelector("#app > div > div > div:nth-child(3) > main > div:nth-child(4) > div");
+    selectorElement.appendChild(newDiv);
+
 }
 </script>
 
@@ -102,7 +117,7 @@ function sendLocation(place) {
         <span style="color: darkslategray; font-size: 13px">{{ place.road_address_name || place.address_name }}</span>
         <div>
           <button style="color: darkslategray; font-size: 11px" @click="goToMap(place.place_url)">페이지</button>
-          <button style="color: deeppink; font-size: 11px" @click="goToMap(place.place_url)">추가해</button>
+          <button style="color: deeppink; font-size: 11px" @click="addItem(place)">추가해</button>
         </div>
       </li>
     </div>
