@@ -138,7 +138,7 @@ function displayInfowindow(marker, place) {
       <Chat/>
     </div>
     <div style="opacity: 0.8;  border-radius: 20px; margin-top: 0px; margin-right: 20px;
- background-color: white; position: absolute; top: 20px; right: 20px; width: 300px; height: 850px; z-index: 5000;
+ background-color: white; position: absolute; top: 20px; right: 20px; width: 300px; height: 900px; z-index: 5000;
 overflow: hidden;">
 
 
@@ -151,14 +151,8 @@ overflow: hidden;">
 </template>
 
 <style scoped>
-html,
 body {
-  margin: 0;
-  padding: 0;
   overflow: hidden; /* 스크롤바 제거 */
-  overflow-x: hidden;
-  overflow-y: hidden;
-
 }
 
 .add-notes-btn {
@@ -178,4 +172,6 @@ body {
 .add-notes-btn:hover {
   background-color: #0056b3; /* 호버 시 더 어두운 파란색으로 변경 */
 }
+
+
 </style>
