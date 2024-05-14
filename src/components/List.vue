@@ -3,7 +3,26 @@ import Sortable from "./Sortable.vue";
 import {computed, nextTick, ref, watch} from "vue";
 import type {SortableEvent, SortableOptions} from "sortablejs";
 import type {AutoScrollOptions} from "sortablejs/plugins";
+import { onMounted } from 'vue'
+import axios from '@/commons/axios';
 
+const http = axios.create({
+  baseURL: 'http://localhost:8080'
+});
+
+onMounted(() => {
+  const logout = async () => {
+    try {
+      let { data } = await http.get("/logout");
+      console.log(data.result)
+      if (data.result == "success") {
+        // do something
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+})
 const store = {
   elements: {
     items: [
