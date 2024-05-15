@@ -16,8 +16,23 @@
       <input type="submit" name="SignUp" value="SignUp" class="login-submit" />
     </div>
     <div class="button-container" :style="{ opacity: 0.9, width: formWidth + 'px', height: '50px'  }">
-      <img class="sns-login" src="@/assets/kakao_small_light.png" alt="" style="opacity: 1;">
-      <img class="sns-login" src="@/assets/naver_small.png" alt="" style="opacity: 1;">
+
+      <!-- Kakao Login Button -->
+      <a href="http://localhost:8080/api/auth/oauth2/kakao" class="login-link">
+        <img class="sns-login" src="@/assets/kakao_small_light.png" alt="Login with Kakao" style="opacity: 1;">
+      </a>
+      <!-- Naver Login Button -->
+      <a href="http://localhost:8080/api/auth/oauth2/google" class="login-link">
+        <img class="sns-login" src="@/assets/google_small.webp" alt="Login with Naver" style="opacity: 1;">
+      </a>
+
+
+      <!-- Naver Login Button -->
+      <a href="http://localhost:8080/api/auth/oauth2/naver" class="login-link">
+        <img class="sns-login" src="@/assets/naver_small.png" alt="Login with Naver" style="opacity: 1;">
+      </a>
+
+<!--      http://localhost:8080/api/auth/oauth2/kakao-->
     </div>
   </form>
 
@@ -31,7 +46,23 @@
 <style scoped>
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700");
 @import url("https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css");
+.login-link {
+  display: inline-block;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 10px;
+}
 
+.sns-login {
+  max-width: 100px; /* Adjust based on your design requirements */
+  opacity: 1; /* Ensure the images are fully opaque */
+  transition: opacity 0.3s ease;
+}
+
+.sns-login:hover {
+  opacity: 0.8; /* Slight opacity change on hover for visual feedback */
+}
 .button-container {
   display: flex;
   justify-content: space-evenly;

@@ -4,6 +4,7 @@ import Notice from '@/views/Notice.vue'
 import Board from '@/components/Board.vue'
 import BoardForm from '@/components/BoardForm.vue'
 import MainPage from '@/views/Main.vue'
+import OAuthCallback from '../views/OAuthCallback.vue'  // Make sure to create this component
 
 
 const router = createRouter({
@@ -18,6 +19,12 @@ const router = createRouter({
       path: '/',
       name: 'main',
       component: MainPage
+    },
+    {
+      path: '/auth/oauth-response/:token',
+      name: 'OAuthCallback',
+      component: OAuthCallback,
+      props: true
     },
     {
       path: '/notice',
