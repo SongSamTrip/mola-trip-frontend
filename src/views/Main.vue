@@ -23,9 +23,11 @@
       </a>
       <!-- Naver Login Button -->
       <a href="http://localhost:8080/api/auth/oauth2/google" class="login-link">
-        <img class="sns-login" src="@/assets/google_small.webp" alt="Login with Naver" style="opacity: 1;">
+        <img class="sns-login" src="@/assets/google_small.webp" alt="Login with Google" style="opacity: 1;">
       </a>
-
+      <a href="http://localhost:8080/api/auth/oauth2/google" class="login-link">
+        <img class="sns-login" src="@/assets/github_small_white.png" alt="Login with Github" style="opacity: 1;">
+      </a>
 
       <!-- Naver Login Button -->
       <a href="http://localhost:8080/api/auth/oauth2/naver" class="login-link">
@@ -55,7 +57,7 @@
 }
 
 .sns-login {
-  max-width: 100px; /* Adjust based on your design requirements */
+  max-width: 65px; /* Adjust based on your design requirements */
   opacity: 1; /* Ensure the images are fully opaque */
   transition: opacity 0.3s ease;
 }
