@@ -34,7 +34,6 @@
         <img class="sns-login" src="@/assets/naver_small.png" alt="Login with Naver" style="opacity: 1;">
       </a>
 
-<!--      http://localhost:8080/api/auth/oauth2/kakao-->
     </div>
   </form>
 

@@ -11,10 +11,9 @@ const http = axios.create({
 });
 
 onMounted(() => {
-  const logout = async () => {
+  const getList = async () => {
     try {
-      let { data } = await http.get("/logout");
-      console.log(data.result)
+      let { data } = await http.get("/api/list");
       if (data.result == "success") {
         // do something
       }
@@ -22,54 +21,14 @@ onMounted(() => {
       console.error(error);
     }
   };
-})
+
+  // logout 함수를 호출합니다.
+  getList();
+});
+
 const store = {
   elements: {
     items: [
-      // {
-      //   id: "1",
-      //   address_name: "제주특별자치도 서귀포시 색달동 2132-2",
-      //   category_group_name: "음식점",
-      //   phone: "0507-1386-7060",
-      //   place_name: "밥",
-      //   place_url: "http://place.map.kakao.com/1890778114",
-      //   road_address_name: "제주특별자치도 서귀포시 색달로 10",
-      //   x: "126.40610781515082",
-      //   y: "33.25884970372605"
-      // },
-      // {
-      //   id: "2",
-      //   address_name: "제주특별자치도 제주시 이호일동 651-3",
-      //   category_group_name: "음식점",
-      //   phone: "064-746-2222",
-      //   place_name: "국",
-      //   place_url: "http://place.map.kakao.com/21455793",
-      //   road_address_name: "제주특별자치도 제주시 항골남길 46",
-      //   x: "126.45914433997106",
-      //   y: "33.498577203781664"
-      // },
-      // {
-      //   id: "3",
-      //   address_name: "제주특별자치도 서귀포시 색달동 2132-2",
-      //   category_group_name: "음식점",
-      //   phone: "0507-1386-7060",
-      //   place_name: "김치",
-      //   place_url: "http://place.map.kakao.com/1890778114",
-      //   road_address_name: "제주특별자치도 서귀포시 색달로 10",
-      //   x: "126.40610781515082",
-      //   y: "33.25884970372605"
-      // },
-      // {
-      //   id: "4",
-      //   address_name: "제주특별자치도 제주시 이호일동 651-3",
-      //   category_group_name: "음식점",
-      //   phone: "064-746-2222",
-      //   place_name: "물",
-      //   place_url: "http://place.map.kakao.com/21455793",
-      //   road_address_name: "제주특별자치도 제주시 항골남길 46",
-      //   x: "126.45914433997106",
-      //   y: "33.498577203781664"
-      // },
     ],
   },
 };
@@ -77,50 +36,7 @@ const store = {
 const store2 = {
   elements: {
     items2: [
-      // {
-      //   id: "1",
-      //   address_name: "제주특별자치도 서귀포시 색달동 2132-2",
-      //   category_group_name: "음식점",
-      //   phone: "0507-1386-7060",
-      //   place_name: "버거",
-      //   place_url: "http://place.map.kakao.com/1890778114",
-      //   road_address_name: "제주특별자치도 서귀포시 색달로 10",
-      //   x: "126.40610781515082",
-      //   y: "33.25884970372605"
-      // },
-      // {
-      //   id: "2",
-      //   address_name: "제주특별자치도 제주시 이호일동 651-3",
-      //   category_group_name: "음식점",
-      //   phone: "064-746-2222",
-      //   place_name: "피자",
-      //   place_url: "http://place.map.kakao.com/21455793",
-      //   road_address_name: "제주특별자치도 제주시 항골남길 46",
-      //   x: "126.45914433997106",
-      //   y: "33.498577203781664"
-      // },
-      // {
-      //   id: "3",
-      //   address_name: "제주특별자치도 서귀포시 색달동 2132-2",
-      //   category_group_name: "음식점",
-      //   phone: "0507-1386-7060",
-      //   place_name: "치킨",
-      //   place_url: "http://place.map.kakao.com/1890778114",
-      //   road_address_name: "제주특별자치도 서귀포시 색달로 10",
-      //   x: "126.40610781515082",
-      //   y: "33.25884970372605"
-      // },
-      // {
-      //   id: "4",
-      //   address_name: "제주특별자치도 제주시 이호일동 651-3",
-      //   category_group_name: "음식점",
-      //   phone: "064-746-2222",
-      //   place_name: "터키",
-      //   place_url: "http://place.map.kakao.com/21455793",
-      //   road_address_name: "제주특별자치도 제주시 항골남길 46",
-      //   x: "126.45914433997106",
-      //   y: "33.498577203781664"
-      // },
+
     ],
   },
 };
@@ -168,7 +84,6 @@ const addItemToGroup = (group: keyof typeof store.elements, item: { id: string; 
 
   store.elements[group].splice(to, 0, item);
   console.log("--------------store.elements-----------------")
-
   console.log(store.elements);
   console.log("----------------store2.elements---------------")
   console.log(store2.elements);

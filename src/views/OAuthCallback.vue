@@ -15,7 +15,7 @@ onMounted(() => {
 
   if (token) {
     localStorage.setItem('authToken', token)
-    router.push('/map')  // Redirect to the map page
+    router.push('/land')  // Redirect to the map page
   } else {
     console.error('Token is missing from the callback URL')
     router.push('/')  // Redirect to the home page or error page

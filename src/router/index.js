@@ -4,7 +4,8 @@ import Notice from '@/views/Notice.vue'
 import Board from '@/components/Board.vue'
 import BoardForm from '@/components/BoardForm.vue'
 import MainPage from '@/views/Main.vue'
-import OAuthCallback from '../views/OAuthCallback.vue'  // Make sure to create this component
+import OAuthCallback from '../views/OAuthCallback.vue'
+import Land from '../views/Land.vue'
 
 
 const router = createRouter({
@@ -25,6 +26,11 @@ const router = createRouter({
       name: 'OAuthCallback',
       component: OAuthCallback,
       props: true
+    },
+    {
+      path: '/land',
+      name: 'land',
+      component: Land,
     },
     {
       path: '/notice',
