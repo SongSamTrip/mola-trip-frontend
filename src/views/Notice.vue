@@ -12,9 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css">
 
   </head>
-  <div class="container centered-image">
-  <img src="/src/assets/logo.png" alt="" style="width: 300px; height: 300px;">
-</div>
+
   <div class="board">
     <div class="d-flex justify-content-center">
     <router-link to="/map" class="btn-primary">Go to Map</router-link>
