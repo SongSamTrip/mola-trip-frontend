@@ -133,9 +133,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- 동적 태그와 클래스 바인딩을 사용하는 루트 컴포넌트 -->
   <component ref="containerRef" :is="$props.tag" :class="$props.class">
-    <!-- 헤더, 아이템, 푸터 슬롯 -->
     <slot
         v-for="(item, index) of list"
         :key="getKey(item)"

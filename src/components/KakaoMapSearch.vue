@@ -67,7 +67,6 @@ function sendLocation(place) {
 
 function addItem(place) {
   console.log(place.place_name)
-  alert(place.place_name)
 
   const newDiv = document.createElement('div');
   newDiv.className = 'draggable';
@@ -75,6 +74,11 @@ function addItem(place) {
   newDiv.setAttribute('data-v-b7ac1dbf','')
   const selectorElement = document.querySelector("#app > div > div > div:nth-child(3) > main > div:nth-child(4) > div");
     selectorElement.appendChild(newDiv);
+
+  console.log("Parent element HTML:");
+  const container = document.getElementById('subList');
+  console.log(container.innerHTML);
+  // console.log(selectorElement.innerHTML); // 부모 요소의 HTML 내용 출력
 
 }
 </script>
