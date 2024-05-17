@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { usePlaceStore } from '@/stores/placeStore'
+import {ref, onMounted} from 'vue'
+import {usePlaceStore} from '@/stores/placeStore'
 import axios from "axios";
 
 const mapContainer = ref(null)
@@ -11,7 +11,7 @@ let map, marker, infowindow, ps
 const emit = defineEmits(['update-location'])
 
 onMounted(() => {
-  infowindow = new kakao.maps.InfoWindow({ zIndex: 1 })
+  infowindow = new kakao.maps.InfoWindow({zIndex: 1})
   ps = new kakao.maps.services.Places()
 
   searchPlaces() // 검색
@@ -52,7 +52,7 @@ function displayPlaces(places) {
   placesList.value = places.map((place, index) => {
     const position = new kakao.maps.LatLng(place.y, place.x)
     // const marker = addMarker(position, index)
-    return { ...place, marker }
+    return {...place, marker}
   })
 }
 
@@ -62,7 +62,7 @@ function goToMap(url) {
 
 function sendLocation(place) {
   // alert(place.x + " " + place.y)
-  emit('update-location', { x: place.x, y: place.y });
+  emit('update-location', {x: place.x, y: place.y});
 }
 
 
@@ -107,30 +107,21 @@ function addItem(place) {
     };
   });
 
-  const jsonData = {
-    items: elements   // 생성된 객체 배열을 'items' 키에 할당
+  const jsonString = JSON.stringify({items: elements});
+  const tripListHtmlDto = {
+    subTripList: jsonString,
   };
-  console.log(JSON.stringify(jsonData, null, 2));
-  // console.log(container.innerHTML);
+  console.log(tripListHtmlDto)
 
-}
-
-function sendData() {
-  // JSON 데이터를 문자열로 변환
-  const jsonString = JSON.stringify(jsonData);
-
-  // Axios를 사용하여 POST 요청 보내기
-  axios.post('https://localhost:8080/api/data', {
-    data: jsonString
-  })
+  axios.put('http://localhost:8080/api/trip-plan/sub-list/1', tripListHtmlDto)
       .then(function (response) {
         console.log('Response:', response.data);
       })
       .catch(function (error) {
         console.error('Error:', error);
       });
-}
 
+}
 </script>
 
 <template>
@@ -150,11 +141,12 @@ function sendData() {
       height: 350px;
       background-color: rgba(255, 255, 255, 0.8);
       z-index: 5000;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" display="none">
-        <symbol id="search" viewBox="0 0 32 32">
-          <path d="M 19.5 3 C 14.26514 3 10 7.2651394 10 12.5 C 10 14.749977 10.810825 16.807458 12.125 18.4375 L 3.28125 27.28125 L 4.71875 28.71875 L 13.5625 19.875 C 15.192542 21.189175 17.250023 22 19.5 22 C 24.73486 22 29 17.73486 29 12.5 C 29 7.2651394 24.73486 3 19.5 3 z M 19.5 5 C 23.65398 5 27 8.3460198 27 12.5 C 27 16.65398 23.65398 20 19.5 20 C 15.34602 20 12 16.65398 12 12.5 C 12 8.3460198 15.34602 5 19.5 5 z" />
-        </symbol>
-      </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" display="none">
+      <symbol id="search" viewBox="0 0 32 32">
+        <path
+            d="M 19.5 3 C 14.26514 3 10 7.2651394 10 12.5 C 10 14.749977 10.810825 16.807458 12.125 18.4375 L 3.28125 27.28125 L 4.71875 28.71875 L 13.5625 19.875 C 15.192542 21.189175 17.250023 22 19.5 22 C 24.73486 22 29 17.73486 29 12.5 C 29 7.2651394 24.73486 3 19.5 3 z M 19.5 5 C 23.65398 5 27 8.3460198 27 12.5 C 27 16.65398 23.65398 20 19.5 20 C 15.34602 20 12 16.65398 12 12.5 C 12 8.3460198 15.34602 5 19.5 5 z"/>
+      </symbol>
+    </svg>
     <div id="menu_wrap" class="bg_white" style="
       overflow-y: auto;
       max-height: 340px;
@@ -311,6 +303,7 @@ body {
   font-size: 13px;
   margin-left: 3px;
 }
+
 .search-form {
   position: relative;
   top: 30px;
