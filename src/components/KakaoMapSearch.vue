@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { usePlaceStore } from '@/stores/placeStore'
+import axios from "axios";
 
 const mapContainer = ref(null)
 const keyword = ref('제주도 맛집')
@@ -71,16 +72,65 @@ function addItem(place) {
   const newDiv = document.createElement('div');
   newDiv.className = 'draggable';
   newDiv.textContent = place.place_name;
-  newDiv.setAttribute('data-v-b7ac1dbf','')
-  const selectorElement = document.querySelector("#app > div > div > div:nth-child(3) > main > div:nth-child(4) > div");
-    selectorElement.appendChild(newDiv);
 
+
+  newDiv.setAttribute('data-v-b7ac1dbf', '')
+  const selectorElement = document.querySelector("#app > div > div > div:nth-child(3) > main > div:nth-child(4) > div");
+  selectorElement.appendChild(newDiv);
+  console.log(place)
   console.log("Parent element HTML:");
-  const container = document.getElementById('subList');
-  console.log(container.innerHTML);
-  // console.log(selectorElement.innerHTML); // 부모 요소의 HTML 내용 출력
+  // const container = document.getElementById('subList');
+  newDiv.id = `place-${place.id}`;
+  newDiv.setAttribute('data-name', place.place_name);
+  newDiv.setAttribute('data-road-address', place.road_address_name);
+  newDiv.setAttribute('data-address', place.address_name);
+  newDiv.setAttribute('data-url', place.place_url);
+  newDiv.setAttribute('data-phone', place.phone);
+  newDiv.setAttribute('data-x', place.x);
+  newDiv.setAttribute('data-y', place.y);
+
+  // json 화
+  const container2 = document.getElementById('subList');
+  const items = container2.querySelectorAll('div');
+  const elements = Array.from(items).map(item => {
+    return {
+      class: item.className,
+      id: item.id,
+      name: item.getAttribute('data-name'),
+      road_address: item.getAttribute('data-name'),
+      address: item.getAttribute('data-address'),
+      url: item.getAttribute('data-url'),
+      phone: item.getAttribute('data-phone'),
+      x: item.getAttribute('data-x'),
+      y: item.getAttribute('data-y'),
+      textContent: item.textContent.trim()
+    };
+  });
+
+  const jsonData = {
+    items: elements   // 생성된 객체 배열을 'items' 키에 할당
+  };
+  console.log(JSON.stringify(jsonData, null, 2));
+  // console.log(container.innerHTML);
 
 }
+
+function sendData() {
+  // JSON 데이터를 문자열로 변환
+  const jsonString = JSON.stringify(jsonData);
+
+  // Axios를 사용하여 POST 요청 보내기
+  axios.post('https://localhost:8080/api/data', {
+    data: jsonString
+  })
+      .then(function (response) {
+        console.log('Response:', response.data);
+      })
+      .catch(function (error) {
+        console.error('Error:', error);
+      });
+}
+
 </script>
 
 <template>

@@ -80,7 +80,6 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
         <template #item="{ element }">
           <div :key="element.id" class="draggable">
             {{ element.place_name }}
-
           </div>
 
         </template>
