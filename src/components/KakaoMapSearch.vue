@@ -112,8 +112,16 @@ function addItem(place) {
     subTripList: jsonString,
   };
   console.log(tripListHtmlDto)
-
-  axios.put('http://localhost:8080/api/trip-plan/sub-list/1', tripListHtmlDto)
+  const accessToken = localStorage.getItem('authToken');
+  console.log(accessToken)
+  console.log(accessToken)
+  console.log(accessToken)
+  console.log(accessToken)
+  axios.put('http://localhost:8080/api/trip-plan/sub-list/1', tripListHtmlDto, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}` // Bearer 스키마를 사용하는 경우
+    }
+  })
       .then(function (response) {
         console.log('Response:', response.data);
       })
