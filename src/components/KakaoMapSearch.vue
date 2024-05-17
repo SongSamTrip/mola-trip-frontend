@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { usePlaceStore } from '@/stores/placeStore'
+import {ref, onMounted} from 'vue'
+import {usePlaceStore} from '@/stores/placeStore'
+import axios from "axios";
 
 const mapContainer = ref(null)
 const keyword = ref('제주도 맛집')
@@ -10,7 +11,7 @@ let map, marker, infowindow, ps
 const emit = defineEmits(['update-location'])
 
 onMounted(() => {
-  infowindow = new kakao.maps.InfoWindow({ zIndex: 1 })
+  infowindow = new kakao.maps.InfoWindow({zIndex: 1})
   ps = new kakao.maps.services.Places()
 
   searchPlaces() // 검색
@@ -51,7 +52,7 @@ function displayPlaces(places) {
   placesList.value = places.map((place, index) => {
     const position = new kakao.maps.LatLng(place.y, place.x)
     // const marker = addMarker(position, index)
-    return { ...place, marker }
+    return {...place, marker}
   })
 }
 
@@ -61,20 +62,72 @@ function goToMap(url) {
 
 function sendLocation(place) {
   // alert(place.x + " " + place.y)
-  emit('update-location', { x: place.x, y: place.y });
+  emit('update-location', {x: place.x, y: place.y});
 }
 
 
 function addItem(place) {
   console.log(place.place_name)
-  alert(place.place_name)
 
   const newDiv = document.createElement('div');
   newDiv.className = 'draggable';
   newDiv.textContent = place.place_name;
-  newDiv.setAttribute('data-v-b7ac1dbf','')
+
+
+  newDiv.setAttribute('data-v-b7ac1dbf', '')
   const selectorElement = document.querySelector("#app > div > div > div:nth-child(3) > main > div:nth-child(4) > div");
-    selectorElement.appendChild(newDiv);
+  selectorElement.appendChild(newDiv);
+  console.log(place)
+  console.log("Parent element HTML:");
+  // const container = document.getElementById('subList');
+  newDiv.id = `place-${place.id}`;
+  newDiv.setAttribute('data-name', place.place_name);
+  newDiv.setAttribute('data-road-address', place.road_address_name);
+  newDiv.setAttribute('data-address', place.address_name);
+  newDiv.setAttribute('data-url', place.place_url);
+  newDiv.setAttribute('data-phone', place.phone);
+  newDiv.setAttribute('data-x', place.x);
+  newDiv.setAttribute('data-y', place.y);
+
+  // json 화
+  const container2 = document.getElementById('subList');
+  const items = container2.querySelectorAll('div');
+  const elements = Array.from(items).map(item => {
+    return {
+      class: item.className,
+      id: item.id,
+      name: item.getAttribute('data-name'),
+      road_address: item.getAttribute('data-name'),
+      address: item.getAttribute('data-address'),
+      url: item.getAttribute('data-url'),
+      phone: item.getAttribute('data-phone'),
+      x: item.getAttribute('data-x'),
+      y: item.getAttribute('data-y'),
+      textContent: item.textContent.trim()
+    };
+  });
+
+  const jsonString = JSON.stringify({items: elements});
+  const tripListHtmlDto = {
+    subTripList: jsonString,
+  };
+  console.log(tripListHtmlDto)
+  const accessToken = localStorage.getItem('authToken');
+  console.log(accessToken)
+  console.log(accessToken)
+  console.log(accessToken)
+  console.log(accessToken)
+  axios.put('http://localhost:8080/api/trip-plan/sub-list/1', tripListHtmlDto, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}` // Bearer 스키마를 사용하는 경우
+    }
+  })
+      .then(function (response) {
+        console.log('Response:', response.data);
+      })
+      .catch(function (error) {
+        console.error('Error:', error);
+      });
 
 }
 </script>
@@ -96,11 +149,12 @@ function addItem(place) {
       height: 350px;
       background-color: rgba(255, 255, 255, 0.8);
       z-index: 5000;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" display="none">
-        <symbol id="search" viewBox="0 0 32 32">
-          <path d="M 19.5 3 C 14.26514 3 10 7.2651394 10 12.5 C 10 14.749977 10.810825 16.807458 12.125 18.4375 L 3.28125 27.28125 L 4.71875 28.71875 L 13.5625 19.875 C 15.192542 21.189175 17.250023 22 19.5 22 C 24.73486 22 29 17.73486 29 12.5 C 29 7.2651394 24.73486 3 19.5 3 z M 19.5 5 C 23.65398 5 27 8.3460198 27 12.5 C 27 16.65398 23.65398 20 19.5 20 C 15.34602 20 12 16.65398 12 12.5 C 12 8.3460198 15.34602 5 19.5 5 z" />
-        </symbol>
-      </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" display="none">
+      <symbol id="search" viewBox="0 0 32 32">
+        <path
+            d="M 19.5 3 C 14.26514 3 10 7.2651394 10 12.5 C 10 14.749977 10.810825 16.807458 12.125 18.4375 L 3.28125 27.28125 L 4.71875 28.71875 L 13.5625 19.875 C 15.192542 21.189175 17.250023 22 19.5 22 C 24.73486 22 29 17.73486 29 12.5 C 29 7.2651394 24.73486 3 19.5 3 z M 19.5 5 C 23.65398 5 27 8.3460198 27 12.5 C 27 16.65398 23.65398 20 19.5 20 C 15.34602 20 12 16.65398 12 12.5 C 12 8.3460198 15.34602 5 19.5 5 z"/>
+      </symbol>
+    </svg>
     <div id="menu_wrap" class="bg_white" style="
       overflow-y: auto;
       max-height: 340px;
@@ -257,6 +311,7 @@ body {
   font-size: 13px;
   margin-left: 3px;
 }
+
 .search-form {
   position: relative;
   top: 30px;
