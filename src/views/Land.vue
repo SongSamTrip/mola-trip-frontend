@@ -1,5 +1,45 @@
 <script setup>
+import {ref, onMounted} from 'vue';
+import { useRouter } from 'vue-router';
+import NewTripModal from '@/components/NewTripModal.vue';
+import JoinTripModal from '@/components/JoinTripModal.vue';
 
+const tripPlans = ref([]);
+
+onMounted(async () => {
+  const authToken = localStorage.getItem('authToken'); // 로컬 스토리지에서 토큰 가져오기
+  if (!authToken) {
+    console.error('Authorization token not found');
+    return;
+  }
+
+  const headers = new Headers({
+    'Authorization': `Bearer ${authToken}`
+  });
+
+  try {
+    const response = await fetch('http://localhost:8080/api/trip-plan/lists', {headers});
+    if (response.ok) {
+      tripPlans.value = await response.json();
+    } else {
+      console.error('Failed to fetch trip plans:', response.status);
+    }
+  } catch (error) {
+    console.error('Error fetching trip plans:', error);
+  }
+});
+
+
+const router = useRouter();
+
+function selectTrip(tripId) {
+  router.push({ name: 'map', params: { tripId } }); // 라우터를 통해 동적 경로로 이동
+}
+
+
+const showModal = ref(false);
+
+const showModal2 = ref(false);
 </script>
 
 <template>
@@ -13,51 +53,33 @@
         </div>
       </div>
       <div class="workspace-list">
-        <div class="workspace-item">
+        <div class="workspace-item" v-for="plan in tripPlans" :key="plan.tripId">
           <div class="workspace-info">
             <div class="workspace-icon"></div>
             <div>
-              <h2>서울여행</h2>
-              <p>1명의 멤버</p>
+              <h2>{{ plan.tripName }}</h2>
+              <p>{{ plan.totalTripMember }}명의 멤버</p>
             </div>
           </div>
-          <button class="btn btn-select">여행선택</button>
+          <button class="btn btn-select" @click="selectTrip(plan.tripId)">여행선택</button>
         </div>
-        <div class="workspace-item">
-          <div class="workspace-info">
-            <div class="workspace-icon"></div>
-            <div>
-              <h2>우주여행</h2>
-              <p>5명의 멤버</p>
-            </div>
-          </div>
-          <button class="btn btn-select">여행선택</button>
-        </div>
-        <div class="workspace-item">
-          <div class="workspace-info">
-            <div class="workspace-icon"></div>
-            <div>
-              <h2>Mola-Trip</h2>
-              <p>2명의 멤버</p>
-            </div>
-          </div>
-          <button class="btn btn-select">여행선택</button>
-        </div>
+
         <div class="more-options">
           <button class="btn btn-more">더 보기 ↓</button>
         </div>
         <div class="more-options">
 
-          <a href="#" class="link">다른 여행 구경가기</a>
+          <a href="/notice" class="link">다른 여행 구경가기</a>
         </div>
         <div class="more-options">
-          <button class="btn btn-join">여행계획 참가하기</button>
-        </div>
+          <button @click="showModal2 = true">여행계획 참가하기</button>
+          <JoinTripModal v-model:isVisible="showModal2" />        </div>
       </div>
     </div>
     <div class="footer">
       <p>새로운 여행 계획을 만들까요?</p>
-      <button class="btn btn-create">새 여행 생성</button>
+      <button @click="showModal = true">새 여행 생성</button>
+      <NewTripModal v-model:isVisible="showModal" />
     </div>
     <div class="profile-icon">
       <svg
@@ -107,11 +129,13 @@
   background: rgba(0, 0, 0, 0.7);
   z-index: -1;
 }
+
 .more-options {
   display: flex;
   justify-content: center;
   margin-bottom: 16px;
 }
+
 @keyframes hue-rotate {
   from {
     filter: grayscale(30%) hue-rotate(0deg);
@@ -120,6 +144,7 @@
     filter: grayscale(30%) hue-rotate(360deg);
   }
 }
+
 * {
   margin: 0;
   padding: 0;
@@ -128,11 +153,11 @@
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #6E42C1;
   display: flex;
   justify-content: center;
-  align-items: center;
   min-height: 100vh;
+  background-color: transparent;
+
 }
 
 .container {

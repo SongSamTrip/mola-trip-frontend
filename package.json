@@ -19,7 +19,8 @@
     "sortablejs": "^1.15.2",
     "sortablejs-vue3": "^1.2.11",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vue3-quill": "^0.3.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
