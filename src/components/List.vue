@@ -49,7 +49,8 @@ function setupSseConnection(tripId) {
   eventSource.onmessage = (event) => {
     const data = JSON.parse(event.data)
     console.log('Received data:', data);
-
+    console.log('Main Trip List:', data.mainTripList);
+    console.log('Sub Trip List:', data.subTripList);
   }
   eventSource.onerror = (error) => {
     console.error('SSE error:', error)

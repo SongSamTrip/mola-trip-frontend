@@ -67,7 +67,6 @@ function sendLocation(place) {
 
 
 function addItem(place) {
-  console.log(place.place_name)
 
   const newDiv = document.createElement('div');
   newDiv.className = 'draggable';
@@ -77,8 +76,6 @@ function addItem(place) {
   newDiv.setAttribute('data-v-b7ac1dbf', '')
   const selectorElement = document.querySelector("#app > div > div > div:nth-child(3) > main > div:nth-child(4) > div");
   selectorElement.appendChild(newDiv);
-  console.log(place)
-  console.log("Parent element HTML:");
   // const container = document.getElementById('subList');
   newDiv.id = `place-${place.id}`;
   newDiv.setAttribute('data-name', place.place_name);
