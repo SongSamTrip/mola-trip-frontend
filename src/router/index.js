@@ -12,9 +12,10 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/map',
+      path: '/map/:tripId',
       name: 'map',
-      component: MapPage
+      component: MapPage,
+      props: true
     },
     {
       path: '/',

@@ -5,6 +5,11 @@ import type {SortableEvent, SortableOptions} from "sortablejs";
 import type {AutoScrollOptions} from "sortablejs/plugins";
 import { onMounted } from 'vue'
 import axios from '@/commons/axios';
+import { useRoute } from 'vue-router'
+import { EventSourcePolyfill } from 'event-source-polyfill';
+
+
+const route = useRoute()
 
 const http = axios.create({
   baseURL: 'http://localhost:8080'
@@ -22,7 +27,35 @@ onMounted(() => {
     }
   };
   getList();
+
+  const tripId = route.params.tripId // URL에서 tripId 가져오기
+  if (tripId) {
+    console.log(tripId)
+    console.log(tripId)
+    setupSseConnection(tripId)
+  }
+
 });
+
+function setupSseConnection(tripId) {
+  const authToken = localStorage.getItem('authToken');
+
+  const eventSource = new EventSourcePolyfill(`http://localhost:8080/api/stream/trip-plans/${tripId}`, {
+    headers: {
+      'Authorization': `Bearer ${authToken}`
+    }
+  });
+
+  eventSource.onmessage = (event) => {
+    const data = JSON.parse(event.data)
+    console.log('Received data:', data);
+
+  }
+  eventSource.onerror = (error) => {
+    console.error('SSE error:', error)
+    eventSource.close()
+  }
+}
 
 function onAdd(event: SortableEvent, group: keyof typeof store.elements) {
   console.log("-------------onAdd----------------")

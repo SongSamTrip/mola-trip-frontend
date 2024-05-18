@@ -1,27 +1,22 @@
 <script setup>
-import { usePlaceStore } from '@/stores/placeStore'
 import { onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import KakaoMapSearch from '@/components/KakaoMapSearch.vue'
 import Chat from '@/components/Chat.vue'
-import { useRouter } from 'vue-router';
-import Draggable from '@/components/List.vue';
-
-const router = useRouter();
-
-const navigateToBoard = () => {
-  router.push({ name: 'boardList' });
-}
-
-const mapContainer = ref(null) // 지도를 담을 ref 생성
+import Draggable from '@/components/List.vue'
+import { usePlaceStore } from '@/stores/placeStore'
 import { storeToRefs } from 'pinia'
 
+const route = useRoute()
+const router = useRouter()
+const mapContainer = ref(null)
 const placeStore = usePlaceStore()
 const { places } = storeToRefs(placeStore)
-
 let map = null
 let markers = []
 let bounds = null
 let infowindow = new kakao.maps.InfoWindow({ zIndex: 9000 })
+
 
 onMounted(() => {
   kakao.maps.load(() => {
@@ -34,7 +29,10 @@ onMounted(() => {
     bounds = new kakao.maps.LatLngBounds()
     let ps = new kakao.maps.services.Places()
   })
+
+
 })
+
 
 function handleLocationUpdate(location) {
   var moveLatLon = new kakao.maps.LatLng(location.y, location.x)
@@ -144,8 +142,6 @@ overflow: hidden;">
 
       <Draggable>
       </Draggable>
-<!--      <Draggable>-->
-<!--      </Draggable>-->
     </div>
   </div>
 </template>
