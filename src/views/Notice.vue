@@ -1,25 +1,33 @@
 <script setup>
-  import {RouterView} from 'vue-router'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from '@/commons/axios';
 
+const router = useRouter();
 
+const createTemporaryPost = () => {
+    axios.post('http://localhost:8080/tripPosts/draft', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      })
+      .then(response => {
+        console.log('게시글이 성공적으로 생성되었습니다:', response.data);
+        const tempPostId = response.data;
+        router.push({ path: '/notice/boardForm', query: { tempPostId } });
+      })
+    
+  };
 </script>
 
 <template>
-  <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/css/bootstrap.min.css">
-
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css">
-
-  </head>
-
   <div class="board">
     <div class="d-flex justify-content-center">
-    <router-link to="/map" class="btn-primary">Go to Map</router-link>
-    <router-link to="/notice/boardList" class="btn-primary">Go to boardList</router-link>
-    <router-link to="/notice/boardForm" class="btn-primary">Go to boardForm</router-link>
-</div>
-    <router-view></router-view> <!-- 여기에 자식 컴포넌트가 렌더링됩니다 -->
+      <router-link to="/map" class="btn-primary">Go to Map</router-link>
+      <router-link to="/notice/boardList" class="btn-primary">Go to boardList</router-link>
+      <button @click="createTemporaryPost" class="btn-primary">Go to boardForm</button>
+    </div>
+    <router-view></router-view>
   </div>
 </template>
 
