@@ -4,11 +4,11 @@
       <header class="header">
         <h1 class="logo">게시글 등록</h1>
         <div class="search-profile">
-          <input type="text" class="search-bar" placeholder="title" />
+          <input type="text" class="search-bar" placeholder="title" v-model="title" />
         </div>
       </header>
       <main class="main-content">
-        <form class="post-form">
+        <form class="post-form" @submit.prevent="send">
           <div class="editor">
             <QuillEditor :modules="modules" 
             toolbar="full" 
@@ -18,8 +18,8 @@
             style="height: 440px"/>
           </div>
 
-          <button type="submit" @click.prevent="send" class="publish-btn">
-            Publish
+          <button type="submit" class="publish-btn">
+            등록
           </button>
         </form>
         <div class="tags">
@@ -32,6 +32,7 @@
 
 <script>
 import { ref, defineComponent  } from 'vue';
+import { useRoute } from 'vue-router'
 import { QuillEditor } from '@vueup/vue-quill';
 import ImageUploader from 'quill-image-uploader';
 import axios from '@/commons/axios';
@@ -41,13 +42,37 @@ export default defineComponent ({
     QuillEditor,
   },
   setup() {
+    const route = useRoute(); // useRoute는 setup 내부에서 호출합니다.
+    const tempPostId = ref(route.query.tempPostId); // ref를 사용하여 반응형으로 만듭니다.
+
+    console.log('Temp Post ID:', tempPostId.value); // 콘솔 로그에 찍힙니다.
+
     const content = ref('');
+    const title = ref('');
+    const uploadedImages = ref([]); // 업로드된 이미지 정보를 저장하는 배열
 
     const send = () => {
-      console.log(content.value);
-    };
+      const postData = {
+        id: tempPostId,
+        name: title.value,
+        content: content.value,
+        images: uploadedImages.value // 업로드된 이미지 정보를 포함
+      };
 
-    const accessToken = localStorage.getItem('authToken');
+      console.log(postData);
+
+      axios.post('http://localhost:8080/tripPosts', postData, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      })
+      .then(response => {
+        console.log('게시글이 성공적으로 저장되었습니다:', response.data);
+      })
+      .catch(error => {
+        console.error('게시글 저장 중 오류가 발생했습니다:', error);
+      });
+    };
 
     const modules = {
         name: 'imageUploader',
@@ -61,31 +86,34 @@ export default defineComponent ({
 
               axios.post('http://localhost:8080/images', formData, {
                 headers: {
-                  'Authorization': `Bearer ${accessToken}`,
+                  'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
                   'Content-Type': 'multipart/form-data'},
               })
               .then(res => {
-                console.log(res)
+                console.log(res);
+                uploadedImages.value.push(res.data); // 업로드된 이미지 정보를 배열에 추가
                 resolve(res.data.url);
               })
               .catch(err => {
                 reject("Upload failed");
-                console.error("Error:", err)
+                console.error("Error:", err);
               })
             })
           }
         }
       }
     
-
     return {
       content,
+      title,
       send,
-      modules
+      modules,
+      uploadedImages
     };
   },
 });
 </script>
+
 
 <style scoped>
 .main {
