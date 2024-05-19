@@ -4,34 +4,48 @@ import {computed, nextTick, ref, watch} from "vue";
 import type {SortableEvent, SortableOptions} from "sortablejs";
 import type {AutoScrollOptions} from "sortablejs/plugins";
 import { onMounted } from 'vue'
-import axios from '@/commons/axios';
 import { useRoute } from 'vue-router'
 import { EventSourcePolyfill } from 'event-source-polyfill';
+import axios from 'axios';
 
 
 const route = useRoute()
+const tripId = route.params.tripId;
+const authToken = localStorage.getItem('authToken');  // 인증 토큰 가져오기
 
 const http = axios.create({
-  baseURL: 'http://localhost:8080'
+  baseURL: 'http://localhost:8080',
+  headers: {
+    'Authorization': `Bearer ${authToken}`
+  }
 });
 
-onMounted(() => {
-  const getList = async () => {
-    try {
-      let { data } = await http.get("/api/list");
-      if (data.result == "success") {
-        // do something
-      }
-    } catch (error) {
-      console.error(error);
+// API 호출을 수행하는 함수
+const getList = async () => {
+  try {
+    console.log("Attempting to fetch data...");
+    let { data } = await http.get(`/api/trip-plan/${tripId}`);
+    if (data.mainTripList) {
+      // mainTripList를 JSON 객체로 파싱
+      updateTripListDiv(JSON.parse(data.mainTripList).items, 'mainList');
+    } else {
+      console.log('Main Trip List is null');
     }
-  };
-  getList();
 
-  const tripId = route.params.tripId // URL에서 tripId 가져오기
+    if (data.subTripList) {
+      // subTripList를 JSON 객체로 파싱
+      updateTripListDiv(JSON.parse(data.subTripList).items, 'subList');
+    } else {
+      console.log('Sub Trip List is null');
+    }
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+  }
+};
+
+onMounted(() => {
   if (tripId) {
-    console.log(tripId)
-    console.log(tripId)
+    getList();
     setupSseConnection(tripId)
   }
 
@@ -47,42 +61,156 @@ function setupSseConnection(tripId) {
   });
 
   eventSource.onmessage = (event) => {
-    const data = JSON.parse(event.data)
+    const data = JSON.parse(event.data);
     console.log('Received data:', data);
 
-  }
+    // mainTripList가 있다면 해당 데이터를 처리
+    if (data.mainTripList) {
+      // mainTripList를 JSON 객체로 파싱
+      updateTripListDiv(JSON.parse(data.mainTripList).items, 'mainList');
+    } else {
+      console.log('Main Trip List is null');
+    }
+
+    // subTripList가 있다면 해당 데이터를 처리
+    if (data.subTripList) {
+      // subTripList를 JSON 객체로 파싱
+      updateTripListDiv(JSON.parse(data.subTripList).items, 'subList');
+    } else {
+      console.log('Sub Trip List is null');
+    }
+  };
+
   eventSource.onerror = (error) => {
-    console.error('SSE error:', error)
-    eventSource.close()
+    console.error('SSE error:', error);
+    eventSource.close(); // 현재의 연결을 종료
+    setTimeout(() => {
+      setupSseConnection(tripId); // 재연결 시도
+    }, 1000); // 5초 후 재연결
+  };
+}
+
+function updateTripListDiv(tripList, containerId) {
+  // ㅇ려기까지는 잘됨
+  // console.log('Updating trip list for:', containerId);
+  // console.log(tripList);
+  //
+  const container = document.getElementById(containerId);
+  container.innerHTML = ''; // 기존 내용을 비움
+
+  console.log(tripList)
+  if (tripList && tripList.length > 0) {
+    tripList.forEach(place => {
+      const newDiv = document.createElement("div")
+      newDiv.textContent = place.name
+      console.log("----------1----------")
+      console.log(place.url)
+      console.log(place.url)
+      container.appendChild(newDiv)
+      console.log("---------2-----------")
+
+      // const newDiv = document.createElement('div');
+      console.log(place)
+
+      newDiv.className = 'draggable';
+      newDiv.textContent = place.name;
+
+      newDiv.setAttribute('data-v-b7ac1dbf', '')
+
+      newDiv.id = `place-${place.id}`;
+      newDiv.setAttribute('data-name', place.name);
+      newDiv.setAttribute('data-road-address', place.road_address);
+      newDiv.setAttribute('data-address', place.address);
+      newDiv.setAttribute('data-url', place.url);
+      newDiv.setAttribute('data-phone', place.phone);
+      newDiv.setAttribute('data-x', place.x);
+      newDiv.setAttribute('data-y', place.y);
+
+      container.appendChild(newDiv);
+    });
+  } else {
+    console.log('No data to display for:', containerId);
   }
+
 }
 
 function onAdd(event: SortableEvent, group: keyof typeof store.elements) {
   console.log("-------------onAdd----------------")
   console.log(event.from);
   console.log(event.to);
+  // updateTripList('mainList', 'subList');
 
 }
 function onChange(event: SortableEvent, group: keyof typeof store.elements) {
   console.log("---------------onChange--------------")
   console.log(event.from);
   console.log(event.to);
+  // updateTripList('mainList', 'subList');
+
+}
+function onUnchoose(event: SortableEvent, group: keyof typeof store.elements) {
+  console.log("---------------onUnchoose--------------")
+  console.log(event.from);
+  console.log(event.to);
+  updateTripList('mainList', 'subList');
+
 }
 
 
-// Changed sorting within list
-function onUpdate(event: SortableEvent, group: keyof typeof store.elements): void {
-  console.log("---------------onUpdate--------------")
-  console.log(event.from);
-  console.log(event.to);
+function updateTripList(containerIdMain, containerIdSub) {
+  // Helper function to extract trip list data from a container
+  const extractData = (containerId) => {
+    const container = document.getElementById(containerId);
+    if (!container) {
+      console.error('Container not found:', containerId);
+      return [];
+    }
 
-}
+    const items = container.querySelectorAll('div');
+    return Array.from(items).map(item => ({
+      class: item.className,
+      id: item.id,
+      name: item.getAttribute('data-name'),
+      road_address: item.getAttribute('data-road-address'),
+      address: item.getAttribute('data-address'),
+      url: item.getAttribute('data-url'),
+      phone: item.getAttribute('data-phone'),
+      x: item.getAttribute('data-x'),
+      y: item.getAttribute('data-y'),
+      textContent: item.textContent.trim()
+    }));
+  };
 
-function onMove(event: SortableEvent, group: keyof typeof store.elements): void {
-  console.log("---------------onMove--------------")
-  console.log(event.from);
-  console.log(event.to);
+  // Extract data from both main and sub containers
+  const mainTripListElements = extractData(containerIdMain);
+  const subTripListElements = extractData(containerIdSub);
 
+  // Serialize data
+  const mainTripListJson = JSON.stringify({ items: mainTripListElements });
+  const subTripListJson = JSON.stringify({ items: subTripListElements });
+
+  // Prepare data object for sending
+  const tripListHtmlDto = {
+    mainTripList: mainTripListJson,
+    subTripList: subTripListJson,
+  };
+
+  // Get authentication token and trip ID from route
+  const accessToken = localStorage.getItem('authToken');
+  const tripId = route.params.tripId;
+
+  // Send data to server
+  axios.put(`http://localhost:8080/api/trip-plan/list/${tripId}`, tripListHtmlDto, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  })
+      .then((response) => {
+        console.log('Response:', response.data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
 }
 
 const options = computed<SortableOptions | AutoScrollOptions>(() => {
@@ -106,7 +234,7 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
     <div style="margin-top: 5px; margin-left: 5px">본리스트</div>
     <div class="wrapper">
       <Sortable id="mainList" ref="sortable1" :list="elements" item-key="id" :options="options" @change="logEvent" @choose="logEvent"
-                @unchoose="logEvent" @start="logEvent" @end="logEvent" @add="onAdd($event, 'items')"
+                @unchoose="onUnchoose($event, 'items')" @start="logEvent" @end="logEvent" @add="onAdd($event, 'items')"
                 @update="onUpdate($event, 'items')" @sort="onSort" @remove="onRemove($event, 'items')"
                 @filter="logEvent"
                 @move="logEvent" @clone="logEvent">
@@ -124,7 +252,7 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
       <Sortable id="subList" ref="sortable2" :list="elements2" item-key="id" :options="options"
                 @change="onChange($event, 'items')"
                 @choose=""
-                @unchoose=""
+                @unchoose="onUnchoose($event, 'items')"
                 @start=""
                 @add="onAdd($event, 'items')"
                 @update="onUpdate($event, 'items')"

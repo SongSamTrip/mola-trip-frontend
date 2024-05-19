@@ -1,7 +1,7 @@
 <script setup>
 import {ref, onMounted} from 'vue'
 import {usePlaceStore} from '@/stores/placeStore'
-import axios from "axios";
+import axios from 'axios';
 
 const mapContainer = ref(null)
 const keyword = ref('제주도 맛집')
@@ -36,10 +36,6 @@ function placesSearchCB(data, status, pagi) {
     placeStore.setPagination(pagi)  // 페이지 정보를 스토어에 저장
     displayPlaces(data)
     pagination.value = pagi
-
-    // 스토어에 저장된 데이터와 페이지네이션 정보를 콘솔에 출력
-    // console.log('스토어에 저장된 장소:', placeStore.places);
-    // console.log('스토어에 저장된 페이지 정보:', placeStore.pagination);
   } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
     alert('검색 결과가 존재하지 않습니다.')
   } else if (status === kakao.maps.services.Status.ERROR) {
@@ -66,8 +62,7 @@ function sendLocation(place) {
 }
 
 
-function addItem(place) {
-  console.log(place.place_name)
+async function addItem(place) {
 
   const newDiv = document.createElement('div');
   newDiv.className = 'draggable';
@@ -75,11 +70,9 @@ function addItem(place) {
 
 
   newDiv.setAttribute('data-v-b7ac1dbf', '')
+
   const selectorElement = document.querySelector("#app > div > div > div:nth-child(3) > main > div:nth-child(4) > div");
   selectorElement.appendChild(newDiv);
-  console.log(place)
-  console.log("Parent element HTML:");
-  // const container = document.getElementById('subList');
   newDiv.id = `place-${place.id}`;
   newDiv.setAttribute('data-name', place.place_name);
   newDiv.setAttribute('data-road-address', place.road_address_name);
@@ -93,11 +86,12 @@ function addItem(place) {
   const container2 = document.getElementById('subList');
   const items = container2.querySelectorAll('div');
   const elements = Array.from(items).map(item => {
+
     return {
       class: item.className,
       id: item.id,
       name: item.getAttribute('data-name'),
-      road_address: item.getAttribute('data-name'),
+      road_address: item.getAttribute('data-road-address'),
       address: item.getAttribute('data-address'),
       url: item.getAttribute('data-url'),
       phone: item.getAttribute('data-phone'),
@@ -108,16 +102,18 @@ function addItem(place) {
   });
 
   const jsonString = JSON.stringify({items: elements});
+  console.log("------------jsonString")
+  console.log(jsonString)
+  console.log("------------jsonString")
   const tripListHtmlDto = {
     subTripList: jsonString,
   };
   console.log(tripListHtmlDto)
   const accessToken = localStorage.getItem('authToken');
-  console.log(accessToken)
-  console.log(accessToken)
-  console.log(accessToken)
-  console.log(accessToken)
-  axios.put('http://localhost:8080/api/trip-plan/sub-list/1', tripListHtmlDto, {
+
+  const tripId = window.location.pathname.split('/')[2];  // URL에서 tripId 추출
+
+  axios.put(`http://localhost:8080/api/trip-plan/sub-list/${tripId}`, tripListHtmlDto, {
     headers: {
       'Authorization': `Bearer ${accessToken}` // Bearer 스키마를 사용하는 경우
     }
