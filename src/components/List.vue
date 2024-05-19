@@ -59,6 +59,11 @@ function setupSseConnection(tripId) {
 
     // subTripList가 있다면 해당 데이터를 처리
     if (data.subTripList) {
+      console.log("----------subTripList----------")
+
+      console.log(data.subTripList)
+      console.log("----------subTripList----------")
+
       // subTripList를 JSON 객체로 파싱
       updateTripListDiv(JSON.parse(data.subTripList).items, 'subList');
     } else {
@@ -73,36 +78,46 @@ function setupSseConnection(tripId) {
 }
 
 function updateTripListDiv(tripList, containerId) {
+  // ㅇ려기까지는 잘됨
   // console.log('Updating trip list for:', containerId);
   // console.log(tripList);
   //
-  // const container = document.getElementById(containerId);
-  // container.innerHTML = ''; // 기존 내용을 비움
-  //
-  //
-  // if (tripList && tripList.length > 0) {
-  //   tripList.forEach(place => {
-  //     const newDiv = document.createElement('div');
-  //     console.log(place)
-  //     newDiv.className = 'draggable';
-  //     newDiv.textContent = place.place_name;
-  //
-  //     newDiv.setAttribute('data-v-b7ac1dbf', '')
-  //
-  //     newDiv.id = `place-${place.id}`;
-  //     newDiv.setAttribute('data-name', place.place_name);
-  //     newDiv.setAttribute('data-road-address', place.road_address_name);
-  //     newDiv.setAttribute('data-address', place.address_name);
-  //     newDiv.setAttribute('data-url', place.place_url);
-  //     newDiv.setAttribute('data-phone', place.phone);
-  //     newDiv.setAttribute('data-x', place.x);
-  //     newDiv.setAttribute('data-y', place.y);
-  //
-  //     container.appendChild(newDiv);
-  //   });
-  // } else {
-  //   console.log('No data to display for:', containerId);
-  // }
+  const container = document.getElementById(containerId);
+  container.innerHTML = ''; // 기존 내용을 비움
+
+  console.log(tripList)
+  if (tripList && tripList.length > 0) {
+    tripList.forEach(place => {
+      const newDiv = document.createElement("div")
+      newDiv.textContent = place.name
+      console.log("----------1----------")
+      console.log(place.url)
+      console.log(place.url)
+      container.appendChild(newDiv)
+      console.log("---------2-----------")
+
+      // const newDiv = document.createElement('div');
+      console.log(place)
+
+      newDiv.className = 'draggable';
+      newDiv.textContent = place.name;
+
+      newDiv.setAttribute('data-v-b7ac1dbf', '')
+
+      newDiv.id = `place-${place.id}`;
+      newDiv.setAttribute('data-name', place.name);
+      newDiv.setAttribute('data-road-address', place.road_address);
+      newDiv.setAttribute('data-address', place.address);
+      newDiv.setAttribute('data-url', place.url);
+      newDiv.setAttribute('data-phone', place.phone);
+      newDiv.setAttribute('data-x', place.x);
+      newDiv.setAttribute('data-y', place.y);
+
+      container.appendChild(newDiv);
+    });
+  } else {
+    console.log('No data to display for:', containerId);
+  }
 
 }
 

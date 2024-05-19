@@ -62,7 +62,7 @@ function sendLocation(place) {
 }
 
 
-function addItem(place) {
+async function addItem(place) {
 
   const newDiv = document.createElement('div');
   newDiv.className = 'draggable';
@@ -73,7 +73,6 @@ function addItem(place) {
 
   const selectorElement = document.querySelector("#app > div > div > div:nth-child(3) > main > div:nth-child(4) > div");
   selectorElement.appendChild(newDiv);
-  // const container = document.getElementById('subList');
   newDiv.id = `place-${place.id}`;
   newDiv.setAttribute('data-name', place.place_name);
   newDiv.setAttribute('data-road-address', place.road_address_name);
@@ -87,11 +86,12 @@ function addItem(place) {
   const container2 = document.getElementById('subList');
   const items = container2.querySelectorAll('div');
   const elements = Array.from(items).map(item => {
+
     return {
       class: item.className,
       id: item.id,
       name: item.getAttribute('data-name'),
-      road_address: item.getAttribute('data-name'),
+      road_address: item.getAttribute('data-road-address'),
       address: item.getAttribute('data-address'),
       url: item.getAttribute('data-url'),
       phone: item.getAttribute('data-phone'),
@@ -102,6 +102,9 @@ function addItem(place) {
   });
 
   const jsonString = JSON.stringify({items: elements});
+  console.log("------------jsonString")
+  console.log(jsonString)
+  console.log("------------jsonString")
   const tripListHtmlDto = {
     subTripList: jsonString,
   };
