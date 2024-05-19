@@ -36,10 +36,6 @@ function placesSearchCB(data, status, pagi) {
     placeStore.setPagination(pagi)  // 페이지 정보를 스토어에 저장
     displayPlaces(data)
     pagination.value = pagi
-
-    // 스토어에 저장된 데이터와 페이지네이션 정보를 콘솔에 출력
-    // console.log('스토어에 저장된 장소:', placeStore.places);
-    // console.log('스토어에 저장된 페이지 정보:', placeStore.pagination);
   } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
     alert('검색 결과가 존재하지 않습니다.')
   } else if (status === kakao.maps.services.Status.ERROR) {
@@ -74,6 +70,7 @@ function addItem(place) {
 
 
   newDiv.setAttribute('data-v-b7ac1dbf', '')
+
   const selectorElement = document.querySelector("#app > div > div > div:nth-child(3) > main > div:nth-child(4) > div");
   selectorElement.appendChild(newDiv);
   // const container = document.getElementById('subList');

@@ -16,22 +16,21 @@ const http = axios.create({
 });
 
 onMounted(() => {
-  const getList = async () => {
-    try {
-      let { data } = await http.get("/api/list");
-      if (data.result == "success") {
-        // do something
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  getList();
+  // const getList = async () => {
+  //   try {
+  //     let { data } = await http.get("/api/list");
+  //     if (data.result == "success") {
+  //       // do something
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+  // getList();
 
   const tripId = route.params.tripId // URL에서 tripId 가져오기
   if (tripId) {
-    console.log(tripId)
-    console.log(tripId)
+
     setupSseConnection(tripId)
   }
 
@@ -47,15 +46,64 @@ function setupSseConnection(tripId) {
   });
 
   eventSource.onmessage = (event) => {
-    const data = JSON.parse(event.data)
+    const data = JSON.parse(event.data);
     console.log('Received data:', data);
-    console.log('Main Trip List:', data.mainTripList);
-    console.log('Sub Trip List:', data.subTripList);
-  }
+
+    // mainTripList가 있다면 해당 데이터를 처리
+    if (data.mainTripList) {
+      // mainTripList를 JSON 객체로 파싱
+      updateTripListDiv(JSON.parse(data.mainTripList).items, 'mainList');
+    } else {
+      console.log('Main Trip List is null');
+    }
+
+    // subTripList가 있다면 해당 데이터를 처리
+    if (data.subTripList) {
+      // subTripList를 JSON 객체로 파싱
+      updateTripListDiv(JSON.parse(data.subTripList).items, 'subList');
+    } else {
+      console.log('Sub Trip List is null');
+    }
+  };
+
   eventSource.onerror = (error) => {
-    console.error('SSE error:', error)
-    eventSource.close()
-  }
+    console.error('SSE error:', error);
+    eventSource.close();
+  };
+}
+
+function updateTripListDiv(tripList, containerId) {
+  // console.log('Updating trip list for:', containerId);
+  // console.log(tripList);
+  //
+  // const container = document.getElementById(containerId);
+  // container.innerHTML = ''; // 기존 내용을 비움
+  //
+  //
+  // if (tripList && tripList.length > 0) {
+  //   tripList.forEach(place => {
+  //     const newDiv = document.createElement('div');
+  //     console.log(place)
+  //     newDiv.className = 'draggable';
+  //     newDiv.textContent = place.place_name;
+  //
+  //     newDiv.setAttribute('data-v-b7ac1dbf', '')
+  //
+  //     newDiv.id = `place-${place.id}`;
+  //     newDiv.setAttribute('data-name', place.place_name);
+  //     newDiv.setAttribute('data-road-address', place.road_address_name);
+  //     newDiv.setAttribute('data-address', place.address_name);
+  //     newDiv.setAttribute('data-url', place.place_url);
+  //     newDiv.setAttribute('data-phone', place.phone);
+  //     newDiv.setAttribute('data-x', place.x);
+  //     newDiv.setAttribute('data-y', place.y);
+  //
+  //     container.appendChild(newDiv);
+  //   });
+  // } else {
+  //   console.log('No data to display for:', containerId);
+  // }
+
 }
 
 function onAdd(event: SortableEvent, group: keyof typeof store.elements) {
