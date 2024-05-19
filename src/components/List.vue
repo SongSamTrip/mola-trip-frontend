@@ -10,39 +10,42 @@ import axios from 'axios';
 
 
 const route = useRoute()
+const tripId = route.params.tripId;
+const authToken = localStorage.getItem('authToken');  // 인증 토큰 가져오기
 
 const http = axios.create({
-  baseURL: 'http://localhost:8080'
+  baseURL: 'http://localhost:8080',
+  headers: {
+    'Authorization': `Bearer ${authToken}`
+  }
 });
 
+// API 호출을 수행하는 함수
+const getList = async () => {
+  try {
+    console.log("Attempting to fetch data...");
+    let { data } = await http.get(`/api/trip-plan/${tripId}`);
+    if (data.mainTripList) {
+      // mainTripList를 JSON 객체로 파싱
+      updateTripListDiv(JSON.parse(data.mainTripList).items, 'mainList');
+    } else {
+      console.log('Main Trip List is null');
+    }
+
+    if (data.subTripList) {
+      // subTripList를 JSON 객체로 파싱
+      updateTripListDiv(JSON.parse(data.subTripList).items, 'subList');
+    } else {
+      console.log('Sub Trip List is null');
+    }
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+  }
+};
+
 onMounted(() => {
-  const route = useRoute();
-  const tripId = route.params.tripId;
-  const authToken = localStorage.getItem('authToken'); // 인증 토큰 가져오기
-
-  const http = axios.create({
-    baseURL: 'http://localhost:8080',
-    headers: {
-      'Authorization': `Bearer ${authToken}`
-    }
-  });
-
-  const getList = async () => {
-    try {
-      // URL 템플릿 문자열을 실제 tripId로 교체
-      let { data } = await http.get(`/api/trip-plan/${tripId}`);
-      if (data.result == "success") {
-        // 성공적으로 데이터를 받아왔을 때의 로직
-        console.log('Data fetched successfully:', data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    }
-  };
-
-  getList();
-
   if (tripId) {
+    getList();
     setupSseConnection(tripId)
   }
 
@@ -71,11 +74,6 @@ function setupSseConnection(tripId) {
 
     // subTripList가 있다면 해당 데이터를 처리
     if (data.subTripList) {
-      console.log("----------subTripList----------")
-
-      console.log(data.subTripList)
-      console.log("----------subTripList----------")
-
       // subTripList를 JSON 객체로 파싱
       updateTripListDiv(JSON.parse(data.subTripList).items, 'subList');
     } else {
@@ -85,7 +83,10 @@ function setupSseConnection(tripId) {
 
   eventSource.onerror = (error) => {
     console.error('SSE error:', error);
-    eventSource.close();
+    eventSource.close(); // 현재의 연결을 종료
+    setTimeout(() => {
+      setupSseConnection(tripId); // 재연결 시도
+    }, 1000); // 5초 후 재연결
   };
 }
 
