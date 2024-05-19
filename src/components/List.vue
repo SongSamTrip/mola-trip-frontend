@@ -4,9 +4,9 @@ import {computed, nextTick, ref, watch} from "vue";
 import type {SortableEvent, SortableOptions} from "sortablejs";
 import type {AutoScrollOptions} from "sortablejs/plugins";
 import { onMounted } from 'vue'
-import axios from '@/commons/axios';
 import { useRoute } from 'vue-router'
 import { EventSourcePolyfill } from 'event-source-polyfill';
+import axios from 'axios';
 
 
 const route = useRoute()
@@ -62,28 +62,71 @@ function onAdd(event: SortableEvent, group: keyof typeof store.elements) {
   console.log("-------------onAdd----------------")
   console.log(event.from);
   console.log(event.to);
+  updateTripList('mainList', 'subList');
 
 }
 function onChange(event: SortableEvent, group: keyof typeof store.elements) {
   console.log("---------------onChange--------------")
   console.log(event.from);
   console.log(event.to);
-}
-
-
-// Changed sorting within list
-function onUpdate(event: SortableEvent, group: keyof typeof store.elements): void {
-  console.log("---------------onUpdate--------------")
-  console.log(event.from);
-  console.log(event.to);
+  updateTripList('mainList', 'subList');
 
 }
 
-function onMove(event: SortableEvent, group: keyof typeof store.elements): void {
-  console.log("---------------onMove--------------")
-  console.log(event.from);
-  console.log(event.to);
+function updateTripList(containerIdMain, containerIdSub) {
+  // Helper function to extract trip list data from a container
+  const extractData = (containerId) => {
+    const container = document.getElementById(containerId);
+    if (!container) {
+      console.error('Container not found:', containerId);
+      return [];
+    }
 
+    const items = container.querySelectorAll('div');
+    return Array.from(items).map(item => ({
+      class: item.className,
+      id: item.id,
+      name: item.getAttribute('data-name'),
+      road_address: item.getAttribute('data-road-address'),
+      address: item.getAttribute('data-address'),
+      url: item.getAttribute('data-url'),
+      phone: item.getAttribute('data-phone'),
+      x: item.getAttribute('data-x'),
+      y: item.getAttribute('data-y'),
+      textContent: item.textContent.trim()
+    }));
+  };
+
+  // Extract data from both main and sub containers
+  const mainTripListElements = extractData(containerIdMain);
+  const subTripListElements = extractData(containerIdSub);
+
+  // Serialize data
+  const mainTripListJson = JSON.stringify({ items: mainTripListElements });
+  const subTripListJson = JSON.stringify({ items: subTripListElements });
+
+  // Prepare data object for sending
+  const tripListHtmlDto = {
+    mainTripList: mainTripListJson,
+    subTripList: subTripListJson,
+  };
+
+  // Get authentication token and trip ID from route
+  const accessToken = localStorage.getItem('authToken');
+  const tripId = route.params.tripId;
+
+  // Send data to server
+  axios.put(`http://localhost:8080/api/trip-plan/list/${tripId}`, tripListHtmlDto, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`
+    }
+  })
+      .then((response) => {
+        console.log('Response:', response.data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
 }
 
 const options = computed<SortableOptions | AutoScrollOptions>(() => {

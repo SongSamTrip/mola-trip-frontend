@@ -1,7 +1,7 @@
 <script setup>
 import {ref, onMounted} from 'vue'
 import {usePlaceStore} from '@/stores/placeStore'
-import axios from "axios";
+import axios from 'axios';
 
 const mapContainer = ref(null)
 const keyword = ref('제주도 맛집')
@@ -110,10 +110,7 @@ function addItem(place) {
   };
   console.log(tripListHtmlDto)
   const accessToken = localStorage.getItem('authToken');
-  console.log(accessToken)
-  console.log(accessToken)
-  console.log(accessToken)
-  console.log(accessToken)
+
   axios.put('http://localhost:8080/api/trip-plan/sub-list/1', tripListHtmlDto, {
     headers: {
       'Authorization': `Bearer ${accessToken}` // Bearer 스키마를 사용하는 경우
