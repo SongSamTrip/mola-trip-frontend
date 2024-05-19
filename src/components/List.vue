@@ -16,21 +16,33 @@ const http = axios.create({
 });
 
 onMounted(() => {
-  // const getList = async () => {
-  //   try {
-  //     let { data } = await http.get("/api/list");
-  //     if (data.result == "success") {
-  //       // do something
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-  // getList();
+  const route = useRoute();
+  const tripId = route.params.tripId;
+  const authToken = localStorage.getItem('authToken'); // 인증 토큰 가져오기
 
-  const tripId = route.params.tripId // URL에서 tripId 가져오기
+  const http = axios.create({
+    baseURL: 'http://localhost:8080',
+    headers: {
+      'Authorization': `Bearer ${authToken}`
+    }
+  });
+
+  const getList = async () => {
+    try {
+      // URL 템플릿 문자열을 실제 tripId로 교체
+      let { data } = await http.get(`/api/trip-plan/${tripId}`);
+      if (data.result == "success") {
+        // 성공적으로 데이터를 받아왔을 때의 로직
+        console.log('Data fetched successfully:', data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  };
+
+  getList();
+
   if (tripId) {
-
     setupSseConnection(tripId)
   }
 

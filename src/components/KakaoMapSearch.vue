@@ -111,7 +111,9 @@ async function addItem(place) {
   console.log(tripListHtmlDto)
   const accessToken = localStorage.getItem('authToken');
 
-  axios.put('http://localhost:8080/api/trip-plan/sub-list/1', tripListHtmlDto, {
+  const tripId = window.location.pathname.split('/')[2];  // URL에서 tripId 추출
+
+  axios.put(`http://localhost:8080/api/trip-plan/sub-list/${tripId}`, tripListHtmlDto, {
     headers: {
       'Authorization': `Bearer ${accessToken}` // Bearer 스키마를 사용하는 경우
     }
