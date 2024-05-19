@@ -137,16 +137,24 @@ function onAdd(event: SortableEvent, group: keyof typeof store.elements) {
   console.log("-------------onAdd----------------")
   console.log(event.from);
   console.log(event.to);
-  updateTripList('mainList', 'subList');
+  // updateTripList('mainList', 'subList');
 
 }
 function onChange(event: SortableEvent, group: keyof typeof store.elements) {
   console.log("---------------onChange--------------")
   console.log(event.from);
   console.log(event.to);
+  // updateTripList('mainList', 'subList');
+
+}
+function onUnchoose(event: SortableEvent, group: keyof typeof store.elements) {
+  console.log("---------------onUnchoose--------------")
+  console.log(event.from);
+  console.log(event.to);
   updateTripList('mainList', 'subList');
 
 }
+
 
 function updateTripList(containerIdMain, containerIdSub) {
   // Helper function to extract trip list data from a container
@@ -225,7 +233,7 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
     <div style="margin-top: 5px; margin-left: 5px">본리스트</div>
     <div class="wrapper">
       <Sortable id="mainList" ref="sortable1" :list="elements" item-key="id" :options="options" @change="logEvent" @choose="logEvent"
-                @unchoose="logEvent" @start="logEvent" @end="logEvent" @add="onAdd($event, 'items')"
+                @unchoose="onUnchoose($event, 'items')" @start="logEvent" @end="logEvent" @add="onAdd($event, 'items')"
                 @update="onUpdate($event, 'items')" @sort="onSort" @remove="onRemove($event, 'items')"
                 @filter="logEvent"
                 @move="logEvent" @clone="logEvent">
@@ -243,7 +251,7 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
       <Sortable id="subList" ref="sortable2" :list="elements2" item-key="id" :options="options"
                 @change="onChange($event, 'items')"
                 @choose=""
-                @unchoose=""
+                @unchoose="onUnchoose($event, 'items')"
                 @start=""
                 @add="onAdd($event, 'items')"
                 @update="onUpdate($event, 'items')"
