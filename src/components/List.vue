@@ -25,16 +25,17 @@ const getList = async () => {
   try {
     console.log("Attempting to fetch data...");
     let {data} = await http.get(`/api/trip-plan/${tripId}`);
+
     if (data.mainTripList) {
       // mainTripList를 JSON 객체로 파싱
-      updateTripListDiv(JSON.parse(data.mainTripList).items, 'mainList');
+      updateTripListDiv(JSON.parse(data.tripListHtmlDto.mainTripList).items, 'mainList');
     } else {
       console.log('Main Trip List is null');
     }
 
     if (data.subTripList) {
       // subTripList를 JSON 객체로 파싱
-      updateTripListDiv(JSON.parse(data.subTripList).items, 'subList');
+      updateTripListDiv(JSON.parse(data.tripListHtmlDto.subTripList).items, 'subList');
     } else {
       console.log('Sub Trip List is null');
     }
