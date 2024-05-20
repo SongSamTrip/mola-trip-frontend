@@ -33,6 +33,10 @@ onMounted(() => {
 
 })
 
+const navigateToBoard = () => {
+  router.push({ name: 'boardList' });
+}
+
 
 function handleLocationUpdate(location) {
   var moveLatLon = new kakao.maps.LatLng(location.y, location.x)

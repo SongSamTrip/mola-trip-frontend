@@ -6,17 +6,20 @@ import axios from '@/commons/axios';
 const router = useRouter();
 
 const createTemporaryPost = () => {
-    axios.post('http://localhost:8080/tripPosts/draft', {
+
+  console.log(localStorage.getItem('authToken'));
+
+    axios.post('http://localhost:8080/tripPosts/draft', {}, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       })
       .then(response => {
         console.log('게시글이 성공적으로 생성되었습니다:', response.data);
-        const tempPostId = response.data;
-        router.push({ path: '/notice/boardForm', query: { tempPostId } });
+        const tempPostId = response.data.tempPostId;
+        const memberId = response.data.memberId;
+        router.push({ path: '/tripPosts/boardForm', query: { tempPostId, memberId } });
       })
-    
   };
 </script>
 
@@ -24,7 +27,7 @@ const createTemporaryPost = () => {
   <div class="board">
     <div class="d-flex justify-content-center">
       <router-link to="/map" class="btn-primary">Go to Map</router-link>
-      <router-link to="/notice/boardList" class="btn-primary">Go to boardList</router-link>
+      <router-link to="/tripPosts/boardList" class="btn-primary">Go to boardList</router-link>
       <button @click="createTemporaryPost" class="btn-primary">Go to boardForm</button>
     </div>
     <router-view></router-view>

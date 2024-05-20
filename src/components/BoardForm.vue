@@ -32,7 +32,7 @@
 
 <script>
 import { ref, defineComponent  } from 'vue';
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { QuillEditor } from '@vueup/vue-quill';
 import ImageUploader from 'quill-image-uploader';
 import axios from '@/commons/axios';
@@ -43,23 +43,27 @@ export default defineComponent ({
   },
   setup() {
     const route = useRoute(); // useRoute는 setup 내부에서 호출합니다.
+    const router = useRouter();
     const tempPostId = ref(route.query.tempPostId); // ref를 사용하여 반응형으로 만듭니다.
+    const memberId = ref(route.query.memberId);
 
     console.log('Temp Post ID:', tempPostId.value); // 콘솔 로그에 찍힙니다.
+    console.log('MemberId :', memberId.value);
 
     const content = ref('');
     const title = ref('');
-    const uploadedImages = ref([]); // 업로드된 이미지 정보를 저장하는 배열
 
     const send = () => {
       const postData = {
-        id: tempPostId,
+        id: tempPostId.value,
+        memberId: memberId.value,
         name: title.value,
         content: content.value,
-        images: uploadedImages.value // 업로드된 이미지 정보를 포함
       };
 
-      console.log(postData);
+      const data = JSON.stringify(postData);
+
+      console.log(data);
 
       axios.post('http://localhost:8080/tripPosts', postData, {
         headers: {
@@ -68,6 +72,8 @@ export default defineComponent ({
       })
       .then(response => {
         console.log('게시글이 성공적으로 저장되었습니다:', response.data);
+        const tripPostId = response.data;
+        router.push({ name: 'boardDetails', params: { tripPostId } });
       })
       .catch(error => {
         console.error('게시글 저장 중 오류가 발생했습니다:', error);
@@ -90,8 +96,7 @@ export default defineComponent ({
                   'Content-Type': 'multipart/form-data'},
               })
               .then(res => {
-                console.log(res);
-                uploadedImages.value.push(res.data); // 업로드된 이미지 정보를 배열에 추가
+                console.log(res.data);
                 resolve(res.data.url);
               })
               .catch(err => {
@@ -107,8 +112,7 @@ export default defineComponent ({
       content,
       title,
       send,
-      modules,
-      uploadedImages
+      modules
     };
   },
 });

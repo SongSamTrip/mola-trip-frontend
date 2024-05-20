@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MapPage from '@/views/Map.vue'
 import Notice from '@/views/Notice.vue'
-import Board from '@/components/Board.vue'
+import BoardList from '@/components/BoardList.vue'
 import BoardForm from '@/components/BoardForm.vue'
 import MainPage from '@/views/Main.vue'
 import OAuthCallback from '../views/OAuthCallback.vue'
 import Land from '../views/Land.vue'
+import BoardDetails from '@/components/BoardDetails.vue'
 
 
 const router = createRouter({
@@ -34,19 +35,25 @@ const router = createRouter({
       component: Land,
     },
     {
-      path: '/notice',
-      name: 'notice',
+      path: '/tripPosts',
+      name: 'tripPosts',
       component: Notice,
       children: [
         {
           path: 'boardList',
           name: 'boardList',
-          component: Board
+          component: BoardList
         },
         {
           path: 'boardForm',
           name: 'boardForm',
           component: BoardForm
+        },
+        {
+          path: 'boardDetails/:tripPostId',
+          name: 'boardDetails',
+          component: BoardDetails,
+          props: true
         }
       ]
     }
