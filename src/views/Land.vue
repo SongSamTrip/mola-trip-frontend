@@ -3,29 +3,56 @@ import {ref, onMounted} from 'vue';
 import { useRouter } from 'vue-router';
 import NewTripModal from '@/components/NewTripModal.vue';
 import JoinTripModal from '@/components/JoinTripModal.vue';
+import { useJwt } from '@vueuse/integrations/useJwt'
+import { useUserStore } from '@/stores/userStore';
 
 const tripPlans = ref([]);
+import axios from 'axios'; // axios를 임포트하세요
+
+const userStore = useUserStore();
+
+const user = userStore.$state;
 
 onMounted(async () => {
-  const authToken = localStorage.getItem('authToken'); // 로컬 스토리지에서 토큰 가져오기
+  const authToken = localStorage.getItem('authToken');
+  console.log(authToken)
   if (!authToken) {
     console.error('Authorization token not found');
     return;
   }
 
-  const headers = new Headers({
-    'Authorization': `Bearer ${authToken}`
-  });
-
   try {
-    const response = await fetch('http://localhost:8080/api/trip-plan/lists', {headers});
-    if (response.ok) {
-      tripPlans.value = await response.json();
-    } else {
-      console.error('Failed to fetch trip plans:', response.status);
+
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      console.error('Authorization token not found');
+      return;
     }
+
+    try {
+      const { header, payload } = useJwt(authToken);
+
+      // ComputedRefImpl에서 값을 추출하기 위해 .value를 사용
+      const actualHeader = header.value;
+      const actualPayload = payload.value;
+
+      const userStore = useUserStore();
+      userStore.setUser(actualPayload.memberId, actualPayload.profileImageUrl, actualPayload.nickName);
+
+
+
+    } catch (error) {
+      console.error('Error decoding JWT:', error);
+    }
+
+    const response = await axios.get('http://localhost:8080/api/trip-plan/lists', {
+      headers: {
+        Authorization: `Bearer ${authToken}`
+      }
+    });
+    tripPlans.value = response.data;
   } catch (error) {
-    console.error('Error fetching trip plans:', error);
+    console.error('Failed to fetch trip plans:', error);
   }
 });
 
@@ -49,7 +76,7 @@ const showModal2 = ref(false);
       <div class="header">
         <h1>어디로 여행을 갈까? </h1>
         <div class="email-box">
-          <p style="color: #2c3e50">sungwoo166@gmail.com의 여행계획</p>
+          <p style="color: #2c3e50"><text style="color: #d90f0f"><b>{{user.nickName }}</b></text> 의 여행계획</p>
         </div>
       </div>
       <div class="workspace-list">

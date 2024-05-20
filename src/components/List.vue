@@ -3,9 +3,9 @@ import Sortable from "./Sortable.vue";
 import {computed, nextTick, ref, watch} from "vue";
 import type {SortableEvent, SortableOptions} from "sortablejs";
 import type {AutoScrollOptions} from "sortablejs/plugins";
-import { onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { EventSourcePolyfill } from 'event-source-polyfill';
+import {onMounted} from 'vue'
+import {useRoute} from 'vue-router'
+import {EventSourcePolyfill} from 'event-source-polyfill';
 import axios from 'axios';
 
 
@@ -24,17 +24,18 @@ const http = axios.create({
 const getList = async () => {
   try {
     console.log("Attempting to fetch data...");
-    let { data } = await http.get(`/api/trip-plan/${tripId}`);
-    if (data.mainTripList) {
+    let {data} = await http.get(`/api/trip-plan/${tripId}`);
+    console.log(data)
+    if (data.tripListHtmlDto.mainTripList) {
       // mainTripList를 JSON 객체로 파싱
-      updateTripListDiv(JSON.parse(data.mainTripList).items, 'mainList');
+      updateTripListDiv(JSON.parse(data.tripListHtmlDto.mainTripList).items, 'mainList');
     } else {
       console.log('Main Trip List is null');
     }
 
-    if (data.subTripList) {
+    if (data.tripListHtmlDto.subTripList) {
       // subTripList를 JSON 객체로 파싱
-      updateTripListDiv(JSON.parse(data.subTripList).items, 'subList');
+      updateTripListDiv(JSON.parse(data.tripListHtmlDto.subTripList).items, 'subList');
     } else {
       console.log('Sub Trip List is null');
     }
@@ -91,33 +92,17 @@ function setupSseConnection(tripId) {
 }
 
 function updateTripListDiv(tripList, containerId) {
-  // ㅇ려기까지는 잘됨
-  // console.log('Updating trip list for:', containerId);
-  // console.log(tripList);
-  //
   const container = document.getElementById(containerId);
   container.innerHTML = ''; // 기존 내용을 비움
 
-  console.log(tripList)
   if (tripList && tripList.length > 0) {
     tripList.forEach(place => {
       const newDiv = document.createElement("div")
-      newDiv.textContent = place.name
-      console.log("----------1----------")
-      console.log(place.url)
-      console.log(place.url)
-      container.appendChild(newDiv)
-      console.log("---------2-----------")
-
-      // const newDiv = document.createElement('div');
-      console.log(place)
-
       newDiv.className = 'draggable';
-      newDiv.textContent = place.name;
+      newDiv.textContent = place.name; // 텍스트를 한 번만 설정
 
-      newDiv.setAttribute('data-v-b7ac1dbf', '')
-
-      newDiv.id = `place-${place.id}`;
+      newDiv.setAttribute('data-v-b7ac1dbf', '');
+      newDiv.id = `${place.id}`;
       newDiv.setAttribute('data-name', place.name);
       newDiv.setAttribute('data-road-address', place.road_address);
       newDiv.setAttribute('data-address', place.address);
@@ -126,7 +111,19 @@ function updateTripListDiv(tripList, containerId) {
       newDiv.setAttribute('data-x', place.x);
       newDiv.setAttribute('data-y', place.y);
 
+      // 삭제 버튼 추가
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Delete'; // 버튼 텍스트 설정
+      deleteButton.onclick = function(event) {
+        event.preventDefault(); // 기본 이벤트 동작 방지
+        newDiv.remove(); // 현재 div를 삭제
+        updateTripList('mainList', 'subList');
+      };
+
+      // 텍스트와 삭제 버튼을 newDiv에 추가
+      newDiv.appendChild(deleteButton);
       container.appendChild(newDiv);
+
     });
   } else {
     console.log('No data to display for:', containerId);
@@ -141,6 +138,7 @@ function onAdd(event: SortableEvent, group: keyof typeof store.elements) {
   // updateTripList('mainList', 'subList');
 
 }
+
 function onChange(event: SortableEvent, group: keyof typeof store.elements) {
   console.log("---------------onChange--------------")
   console.log(event.from);
@@ -148,6 +146,7 @@ function onChange(event: SortableEvent, group: keyof typeof store.elements) {
   // updateTripList('mainList', 'subList');
 
 }
+
 function onUnchoose(event: SortableEvent, group: keyof typeof store.elements) {
   console.log("---------------onUnchoose--------------")
   console.log(event.from);
@@ -186,8 +185,8 @@ function updateTripList(containerIdMain, containerIdSub) {
   const subTripListElements = extractData(containerIdSub);
 
   // Serialize data
-  const mainTripListJson = JSON.stringify({ items: mainTripListElements });
-  const subTripListJson = JSON.stringify({ items: subTripListElements });
+  const mainTripListJson = JSON.stringify({items: mainTripListElements});
+  const subTripListJson = JSON.stringify({items: subTripListElements});
 
   // Prepare data object for sending
   const tripListHtmlDto = {
@@ -233,7 +232,8 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
   <main>
     <div style="margin-top: 5px; margin-left: 5px">본리스트</div>
     <div class="wrapper">
-      <Sortable id="mainList" ref="sortable1" :list="elements" item-key="id" :options="options" @change="logEvent" @choose="logEvent"
+      <Sortable id="mainList" ref="sortable1" :list="elements" item-key="id" :options="options" @change="logEvent"
+                @choose="logEvent"
                 @unchoose="onUnchoose($event, 'items')" @start="logEvent" @end="logEvent" @add="onAdd($event, 'items')"
                 @update="onUpdate($event, 'items')" @sort="onSort" @remove="onRemove($event, 'items')"
                 @filter="logEvent"

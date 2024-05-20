@@ -1,21 +1,21 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import {onMounted, ref, watch} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import KakaoMapSearch from '@/components/KakaoMapSearch.vue'
 import Chat from '@/components/Chat.vue'
 import Draggable from '@/components/List.vue'
-import { usePlaceStore } from '@/stores/placeStore'
-import { storeToRefs } from 'pinia'
+import {usePlaceStore} from '@/stores/placeStore'
+import {storeToRefs} from 'pinia'
 
 const route = useRoute()
 const router = useRouter()
 const mapContainer = ref(null)
 const placeStore = usePlaceStore()
-const { places } = storeToRefs(placeStore)
+const {places} = storeToRefs(placeStore)
 let map = null
 let markers = []
 let bounds = null
-let infowindow = new kakao.maps.InfoWindow({ zIndex: 9000 })
+let infowindow = new kakao.maps.InfoWindow({zIndex: 9000})
 
 
 onMounted(() => {
@@ -119,6 +119,35 @@ function displayInfowindow(marker, place) {
   infowindow.setContent(content)
   infowindow.open(map, marker)
 }
+
+
+const isDropdownVisible = ref(false);
+const trips = ref([
+  {id: 1, name: 'Trip 1'},
+  {id: 2, name: 'Trip 2'},
+  {id: 3, name: 'Trip 3'}
+]);
+
+function toggleDropdown() {
+  isDropdownVisible.value = !isDropdownVisible.value;
+}
+
+function selectTrip(trip) {
+  console.log('Selected Trip:', trip.name);
+  isDropdownVisible.value = false; // 드롭다운 닫기
+  // 추가적인 작업을 여기에 추가할 수 있습니다. 예: 페이지 리다이렉트
+}
+
+
+const inviteCode = ref("1234-5678-ABCD"); // 예제 초대 코드
+
+function copyInviteCode() {
+  navigator.clipboard.writeText(inviteCode.value).then(() => {
+    alert('초대 코드가 클립보드에 복사되었습니다.');
+  }).catch(err => {
+    console.error('클립보드 복사 실패:', err);
+  });
+}
 </script>
 
 <template>
@@ -128,7 +157,29 @@ function displayInfowindow(marker, place) {
     >
       <KakaoMapSearch @update-location="handleLocationUpdate"></KakaoMapSearch>
       <!-- 버튼 추가 -->
-      <button class="add-notes-btn" @click="navigateToBoard" style="position: absolute; right: -120px; top: 0;">게시글</button>
+
+      <div
+          style=" margin-left: 100px; position: absolute; top: 0; width: 1000px; display: flex; justify-content: space-evenly;">
+
+        <nav style="background-color: rgba(255, 255, 255, 0);" id="navigation" class="site-navigation" role="navigation">
+          <ul class="menu">
+            <li style="margin-left: 50px" class="menu-item"><a href="#">게시판</a></li>
+            <li  style="margin-left: 50px" class="menu-item"><a href="#">여행목록</a>
+              <ul class="dropdown">
+                <li class="menu-item sub-menu"><a href="#">CSS</a></li>
+                <li class="menu-item sub-menu"><a href="#">HTML</a></li>
+                <li class="menu-item sub-menu"><a href="#">jQuery</a></li>
+                <li class="menu-item sub-menu"><a href="#">PHP</a></li>
+                <li class="menu-item sub-menu"><a href="#">WordPress</a></li>
+              </ul>
+            </li>
+            <li @click="copyInviteCode" style="margin-left: 50px" class="menu-item"><a href="#">여행코드 복사</a></li>
+
+          </ul>
+        </nav>
+
+      </div>
+
     </div>
     <div
         style="position: absolute; top: 430px; left: 20px; width: 350px; height: 500px; z-index: 5000"
@@ -169,5 +220,75 @@ body {
   background-color: #0056b3; /* 호버 시 더 어두운 파란색으로 변경 */
 }
 
+.site-navigation {
 
+  display: block;
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 20px;
+}
+
+.site-navigation ul {
+  background: #000000;
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+.site-navigation li {
+  color: #fff;
+  background:  rgba(255, 255, 255, 0);
+  border-radius: 20px; /* 둥근 모서리 */
+
+  display: block;
+  float: left;
+  margin: 0 2px 0 0;
+  padding: 12px;
+
+  position: relative;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.site-navigation li a {
+  color: #ffffff;
+  text-decoration: none;
+  display: block;
+}
+
+.site-navigation li:hover {
+  @include transition(background, 0.2s);
+  background:  rgba(255, 255, 255, 0);
+
+  cursor: pointer;
+}
+
+.site-navigation ul li ul {
+  background:  rgba(255, 255, 255, 0);
+
+  visibility: hidden;
+  float: left;
+  min-width: 150px;
+  position: absolute;
+  transition: visibility 0.65s ease-in;
+  margin-top: 12px;
+  left: 0;
+  z-index: 999;
+}
+
+.site-navigation ul li:hover > ul,
+.site-navigation ul li ul:hover {
+  visibility: visible;
+}
+
+.site-navigation ul li ul li {
+  clear: both;
+  padding: 5px 0 5px 18px;
+  width: 100%;
+}
+
+.site-navigation ul li ul li:hover {
+  background: #74b7e4;
+}
 </style>
