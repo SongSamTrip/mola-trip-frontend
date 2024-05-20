@@ -24,7 +24,18 @@
           </form>
           <ul class="comment-list">
             <li v-for="comment in comments" :key="comment.id" class="comment-item">
-              {{ comment.memberTripPostDto.nickname }} : {{ parseContent(comment.content) }}
+              <div v-if="editCommentId === comment.id">
+                <input type="text" v-model="editCommentContent" class="comment-input-edit" />
+                <button @click="updateComment(comment.id)" class="save-button">저장</button>
+                <button @click="cancelEdit()" class="cancel-button">취소</button>
+              </div>
+              <div v-else>
+                {{ comment.memberTripPostDto.nickname }} : {{ parseContent(comment.content) }}
+                <div v-if="comment.memberTripPostDto.id === user.memberId" class="comment-buttons">
+                  <button @click="startEditComment(comment)" class="edit-button">수정</button>
+                  <button @click="deleteComment(comment.id)" class="delete-button">삭제</button>
+                </div>
+              </div>
             </li>
           </ul>
         </div>
@@ -36,6 +47,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useJwt } from '@vueuse/integrations/useJwt';
 import axios from '@/commons/axios';
 
 const route = useRoute();
@@ -43,8 +55,29 @@ const post = ref({});
 const liked = ref(false);
 const comments = ref([]);
 const newComment = ref('');
+const editCommentId = ref(null);
+const editCommentContent = ref('');
+
+import { useUserStore } from '@/stores/userStore';
+
+const userStore = useUserStore();
+const user = userStore.$state;
 
 onMounted(async () => {
+  const authToken = localStorage.getItem('authToken');
+  if (!authToken) {
+    console.error('Authorization token not found');
+    return;
+  }
+
+  try {
+    const { header, payload } = useJwt(authToken);
+    const actualPayload = payload.value;
+    userStore.setUser(actualPayload.memberId, actualPayload.profileImageUrl, actualPayload.nickName);
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+  }
+
   try {
     const postId = route.params.tripPostId;
     const response = await axios.get(`http://localhost:8080/tripPosts/${postId}`, {
@@ -53,7 +86,6 @@ onMounted(async () => {
       }
     });
     post.value = response.data;
-    // 데이터를 받아서 좋아요 상태와 댓글 목록을 초기화합니다.
     liked.value = post.value.like;
     comments.value = post.value.commentDtos || [];
   } catch (error) {
@@ -62,28 +94,25 @@ onMounted(async () => {
 });
 
 const toggleLike = async () => {
-  // 현재 좋아요 상태를 기준으로 토글 처리
   if (liked.value) {
-    // 좋아요가 눌러져 있을 때: DELETE 요청으로 좋아요 취소
     try {
       await axios.delete(`http://localhost:8080/tripPosts/${post.value.id}/likes`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       });
-      liked.value = false; // 상태 업데이트
+      liked.value = false;
     } catch (error) {
       console.error('좋아요 취소 중 오류가 발생했습니다:', error);
     }
   } else {
-    // 좋아요가 눌러져 있지 않을 때: POST 요청으로 좋아요 설정
     try {
       await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/likes`, {}, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
         }
       });
-      liked.value = true; // 상태 업데이트
+      liked.value = true;
     } catch (error) {
       console.error('좋아요 설정 중 오류가 발생했습니다:', error);
     }
@@ -92,7 +121,6 @@ const toggleLike = async () => {
 
 const submitComment = async () => {
   if (newComment.value.trim()) {
-    // 댓글 데이터를 서버에 전송합니다.
     try {
       const response = await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/comments`, {
         content: newComment.value
@@ -102,15 +130,61 @@ const submitComment = async () => {
         }
       });
 
-      // 서버에서 처리된 댓글 데이터를 받아옵니다.
       const savedComment = response.data;
-      // 화면의 댓글 목록에 추가합니다.
       comments.value.push(savedComment);
-      // 입력 창을 비웁니다.
       newComment.value = '';
     } catch (error) {
       console.error('댓글 저장 중 오류가 발생했습니다:', error);
     }
+  }
+};
+
+const deleteComment = async (commentId) => {
+  try {
+    await axios.delete(`http://localhost:8080/tripPosts/${post.value.id}/comments/${commentId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+    comments.value = comments.value.filter(comment => comment.id !== commentId);
+  } catch (error) {
+    console.error('댓글 삭제 중 오류가 발생했습니다:', error);
+  }
+};
+
+const startEditComment = (comment) => {
+  editCommentId.value = comment.id;
+  editCommentContent.value = parseContent(comment.content);
+};
+
+const cancelEdit = () => {
+  editCommentId.value = null;
+  editCommentContent.value = '';
+};
+
+const updateComment = async (commentId) => {
+  try {
+    const response = await axios.put(`http://localhost:8080/tripPosts/${post.value.id}/comments/${commentId}`, {
+      id: commentId,
+      memberTripPostDto: {
+        id: user.memberId,
+        nickname: user.nickName
+      },
+      content: editCommentContent.value
+    }, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+
+    const updatedComment = response.data;
+    const index = comments.value.findIndex(comment => comment.id === commentId);
+    if (index !== -1) {
+      comments.value[index] = updatedComment;
+    }
+    cancelEdit();
+  } catch (error) {
+    console.error('댓글 수정 중 오류가 발생했습니다:', error);
   }
 };
 
@@ -119,7 +193,7 @@ function parseContent(content) {
     const parsed = JSON.parse(content);
     return parsed.content;
   } catch (e) {
-    return content; // Fallback for any unexpected format
+    return content;
   }
 }
 </script>
@@ -221,5 +295,42 @@ function parseContent(content) {
   padding: 8px;
   background-color: #ecf0f1;
   border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comment-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-button, .delete-button, .save-button, .cancel-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.delete-button {
+  background-color: red;
+}
+
+.save-button {
+  background-color: #2ecc71;
+}
+
+.cancel-button {
+  background-color: #e74c3c;
+}
+
+.comment-input-edit {
+  flex-grow: 1;
+  padding: 8px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
 }
 </style>
