@@ -6,7 +6,6 @@ import Chat from '@/components/Chat.vue'
 import Draggable from '@/components/List.vue'
 import {usePlaceStore} from '@/stores/placeStore'
 import {storeToRefs} from 'pinia'
-
 const route = useRoute()
 const router = useRouter()
 const mapContainer = ref(null)
@@ -139,15 +138,13 @@ function selectTrip(trip) {
 }
 
 
-const inviteCode = ref("1234-5678-ABCD"); // 예제 초대 코드
+const tripCode = ref(""); // tripCode를 저장할 ref 생성
 
-function copyInviteCode() {
-  navigator.clipboard.writeText(inviteCode.value).then(() => {
-    alert('초대 코드가 클립보드에 복사되었습니다.');
-  }).catch(err => {
-    console.error('클립보드 복사 실패:', err);
-  });
-}
+
+
+
+
+
 </script>
 
 <template>
@@ -173,7 +170,6 @@ function copyInviteCode() {
                 <li class="menu-item sub-menu"><a href="#">WordPress</a></li>
               </ul>
             </li>
-            <li @click="copyInviteCode" style="margin-left: 50px" class="menu-item"><a href="#">여행코드 복사</a></li>
 
           </ul>
         </nav>
@@ -191,8 +187,8 @@ function copyInviteCode() {
 overflow: hidden;">
 
 
-      <Draggable>
-      </Draggable>
+      <Draggable></Draggable>
+
     </div>
   </div>
 </template>

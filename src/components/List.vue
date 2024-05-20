@@ -7,11 +7,17 @@ import {onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 import {EventSourcePolyfill} from 'event-source-polyfill';
 import axios from 'axios';
+import { defineEmits } from 'vue';
 
 
 const route = useRoute()
 const tripId = route.params.tripId;
 const authToken = localStorage.getItem('authToken');  // 인증 토큰 가져오기
+const emit = defineEmits(['updateTripCode']);
+const tripCode = ref('');
+
+
+
 
 const http = axios.create({
   baseURL: 'http://localhost:8080',
@@ -25,7 +31,8 @@ const getList = async () => {
   try {
     console.log("Attempting to fetch data...");
     let {data} = await http.get(`/api/trip-plan/${tripId}`);
-    console.log(data)
+    tripCode.value = data.tripCode;  // 가져온 tripCode를 저장합니다.
+
     if (data.tripListHtmlDto.mainTripList) {
       // mainTripList를 JSON 객체로 파싱
       updateTripListDiv(JSON.parse(data.tripListHtmlDto.mainTripList).items, 'mainList');
@@ -43,6 +50,15 @@ const getList = async () => {
     console.error("Failed to fetch data:", error);
   }
 };
+
+function copyInviteCode() {
+  navigator.clipboard.writeText(tripCode.value).then(() => {
+    alert('초대 코드 ' + tripCode.value + ' 가 클립보드에 복사되었습니다.');
+  }).catch(err => {
+    console.error('클립보드 복사 실패:', err);
+    alert('클립보드 복사에 실패했습니다.');
+  });
+}
 
 onMounted(() => {
   if (tripId) {
@@ -229,6 +245,11 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
 </script>
 
 <template>
+
+  <div class="button-container">
+    <button @click="copyInviteCode" style="margin: 10px 0;">초대 코드 복사</button>
+  </div>
+  <hr>
   <main>
     <div style="margin-top: 5px; margin-left: 5px">본리스트</div>
     <div class="wrapper">
@@ -276,6 +297,11 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
 </template>
 
 <style lang="css" scoped>
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 main {
   max-width: 800px;
   margin: 0 auto;
