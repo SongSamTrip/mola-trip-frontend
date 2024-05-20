@@ -24,7 +24,7 @@
           </form>
           <ul class="comment-list">
             <li v-for="comment in comments" :key="comment.id" class="comment-item">
-              {{ comment.content }}
+              {{ comment.memberTripPostDto.nickname }} : {{ parseContent(comment.content) }}
             </li>
           </ul>
         </div>
@@ -61,19 +61,40 @@ onMounted(async () => {
   }
 });
 
-// Toggle like state
-const toggleLike = () => {
-  liked.value = !liked.value;
-  // 서버에 좋아요 상태를 업데이트하기 위한 로직을 추가할 수 있습니다.
+const toggleLike = async () => {
+  // 현재 좋아요 상태를 기준으로 토글 처리
+  if (liked.value) {
+    // 좋아요가 눌러져 있을 때: DELETE 요청으로 좋아요 취소
+    try {
+      await axios.delete(`http://localhost:8080/tripPosts/${post.value.id}/likes`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      liked.value = false; // 상태 업데이트
+    } catch (error) {
+      console.error('좋아요 취소 중 오류가 발생했습니다:', error);
+    }
+  } else {
+    // 좋아요가 눌러져 있지 않을 때: POST 요청으로 좋아요 설정
+    try {
+      await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/likes`, {}, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      liked.value = true; // 상태 업데이트
+    } catch (error) {
+      console.error('좋아요 설정 중 오류가 발생했습니다:', error);
+    }
+  }
 };
 
 const submitComment = async () => {
-  console.log(post.value.id);
   if (newComment.value.trim()) {
     // 댓글 데이터를 서버에 전송합니다.
     try {
       const response = await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/comments`, {
-
         content: newComment.value
       }, {
         headers: {
@@ -83,10 +104,8 @@ const submitComment = async () => {
 
       // 서버에서 처리된 댓글 데이터를 받아옵니다.
       const savedComment = response.data;
-      
       // 화면의 댓글 목록에 추가합니다.
       comments.value.push(savedComment);
-
       // 입력 창을 비웁니다.
       newComment.value = '';
     } catch (error) {
@@ -94,6 +113,15 @@ const submitComment = async () => {
     }
   }
 };
+
+function parseContent(content) {
+  try {
+    const parsed = JSON.parse(content);
+    return parsed.content;
+  } catch (e) {
+    return content; // Fallback for any unexpected format
+  }
+}
 </script>
 
 <style scoped>

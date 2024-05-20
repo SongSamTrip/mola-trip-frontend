@@ -33,8 +33,9 @@ onMounted(() => {
 });
 
 async function fetchPosts(page) {
+  const pageSize = 10; // 한 페이지당 항목 수 고정
   try {
-    const response = await axios.get(`http://localhost:8080/tripPosts?page=${page}`, {
+    const response = await axios.get(`http://localhost:8080/tripPosts?page=${page}&size=${pageSize}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
     });
     posts.value = response.data.content;
