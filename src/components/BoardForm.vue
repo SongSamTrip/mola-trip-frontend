@@ -133,11 +133,37 @@ export default defineComponent({
       });
     };
 
+    const fetchPostDetails = async () => {
+      if (!tempPostId.value) return;
+      try {
+        const response = await axios.get(`http://localhost:8080/tripPosts/${tempPostId.value}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+        const postData = response.data;
+        title.value = postData.name;
+        content.value = postData.content;
+        selectedTripPlanId.value = postData.tripPlanId;
+        // tripPlans 정보 업데이트 (선택적)
+      } catch (error) {
+        console.error('Error fetching post details:', error);
+      }
+    };
+
     onMounted(() => {
       fetchTripPlans();
+      if (tempPostId.value) {
+        fetchPostDetails();
+      }
     });
 
     const send = () => {
+
+      if(selectedTripPlanId.value == null){
+        alert("씨발년아");
+        return;
+      }
       const postData = {
         id: tempPostId.value,
         memberId: memberId.value,
@@ -147,6 +173,7 @@ export default defineComponent({
       };
 
       const data = JSON.stringify(postData);
+      
 
       console.log(data);
 
@@ -172,7 +199,7 @@ export default defineComponent({
         upload: file => {
           return new Promise((resolve, reject) => {
             const formData = new FormData();
-            formData.append("tripPostId", "1");
+            formData.append("tripPostId", tempPostId.value);
             formData.append("file", file);
 
             axios.post('http://localhost:8080/images', formData, {

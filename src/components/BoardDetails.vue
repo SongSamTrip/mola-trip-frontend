@@ -7,6 +7,10 @@
           <p class="search-bar">제목: {{ post.name }}</p>
           <p class="search-bar">글쓴이: {{ post.nickname }}</p>
         </div>
+        <div v-if="user.memberId === post.memberId && !isEditing" class="post-controls">
+          <button @click="updatePost(post.id, user.memberId)" class="edit-button">수정</button>
+          <button @click="confirmDelete()" class="delete-button">삭제</button>
+        </div>
       </header>
       <main class="main-content">
         <div v-html="post.content"></div>
@@ -58,7 +62,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import axios from '@/commons/axios';
 import { useUserStore } from '@/stores/userStore';
 import { useJwt } from '@vueuse/integrations/useJwt';
@@ -72,6 +76,9 @@ const editCommentId = ref(null);
 const editCommentContent = ref('');
 const mainListItems = ref([]);
 const tripName = ref('');
+const isEditing = ref(false);
+const editablePost = ref({});
+const router = useRouter();
 
 const userStore = useUserStore();
 const user = userStore.$state;
@@ -93,7 +100,7 @@ onMounted(async () => {
     });
 
     post.value = response.data;
-    liked.value = post.value.isLike;
+    liked.value = post.value.like;
     comments.value = post.value.commentDtos || [];
     tripName.value = post.value.tripName;
     mainListItems.value = JSON.parse(post.value.mainList).items; // Parse mainList from the post
@@ -103,45 +110,51 @@ onMounted(async () => {
 });
 
 const toggleLike = async () => {
-  const endpoint = `http://localhost:8080/tripPosts/${post.value.id}/likes`;
-  const config = { headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` } };
-  
-  try {
-    if (liked.value) {
-      await axios.delete(endpoint, config);
+  if (liked.value) {
+    try {
+      await axios.delete(`http://localhost:8080/tripPosts/${post.value.id}/likes`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
       liked.value = false;
-    } else {
-      await axios.post(endpoint, {}, config);
-      liked.value = true;
+    } catch (error) {
+      console.error('좋아요 취소 중 오류가 발생했습니다:', error);
     }
-  } catch (error) {
-    console.error('Error toggling like:', error);
+  } else {
+    try {
+      await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/likes`, {}, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+      liked.value = true;
+    } catch (error) {
+      console.error('좋아요 설정 중 오류가 발생했습니다:', error);
+    }
   }
 };
 
 const submitComment = async () => {
-  if (!newComment.value.trim()) return;
-  try {
-    const response = await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/comments`, 
-      { content: newComment.value }, 
-      { headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` } }
-    );
-    comments.value.push(response.data);
-    newComment.value = '';
-  } catch (error) {
-    console.error('Error submitting comment:', error);
+  if (newComment.value.trim()) {
+    try {
+      const response = await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/comments`, {
+        content: newComment.value
+      }, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+
+      const savedComment = response.data;
+      comments.value.push(savedComment);
+      newComment.value = '';
+    } catch (error) {
+      console.error('댓글 저장 중 오류가 발생했습니다:', error);
+    }
   }
 };
 
-const startEditComment = (comment) => {
-  editCommentId.value = comment.id;
-  editCommentContent.value = parseContent(comment.content);
-};
-
-const cancelEdit = () => {
-  editCommentId.value = null;
-  editCommentContent.value = '';
-};
 
 const updateComment = async (commentId) => {
   try {
@@ -171,14 +184,42 @@ const updateComment = async (commentId) => {
 
 const deleteComment = async (commentId) => {
   try {
-    await axios.delete(`http://localhost:8080/tripPosts/${post.value.id}/comments/${commentId}`, 
-      { headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` } }
-    );
+    await axios.delete(`http://localhost:8080/tripPosts/${post.value.id}/comments/${commentId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
     comments.value = comments.value.filter(comment => comment.id !== commentId);
   } catch (error) {
-    console.error('Error deleting comment:', error);
+    console.error('댓글 삭제 중 오류가 발생했습니다:', error);
   }
 };
+
+function updatePost(tempPostId, memberId){
+  router.push({ name: 'boardForm', query: { tempPostId, memberId } });
+}
+
+function confirmDelete() {
+  if (confirm("게시글을 삭제하시겠습니까?")) {
+    deletePost(post.value.id);
+  }
+}
+
+function deletePost(postId) {
+  axios.delete(`http://localhost:8080/tripPosts/${postId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    })
+    .then(() => {
+      alert("게시글이 삭제되었습니다.");
+      router.push({ name: 'boardList' });
+    })
+    .catch(error => {
+      console.error("게시글 삭제 중 오류가 발생했습니다:", error);
+      alert("게시글 삭제 중 문제가 발생했습니다.");
+    });
+}
 
 function parseContent(content) {
   try {
@@ -232,13 +273,20 @@ function parseContent(content) {
   padding: 8px;
   border-radius: 20px;
   border: 1px solid #ccc;
-  margin-left: 10px;
-  margin-right: 10px;
-  width: 300px; /* Adjusted for better fit */
 }
 
 .main-content {
   padding-top: 20px;
+}
+
+.edit-content {
+  width: 100%;
+  height: 300px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
 }
 
 .place-list {
