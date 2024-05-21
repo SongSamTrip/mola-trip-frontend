@@ -98,9 +98,6 @@ const showModal2 = ref(false);
           <button class="btn btn-select" @click="selectTrip(plan.tripId)">여행선택</button>
         </div>
 
-        <!--        <div class="more-options">-->
-        <!--          <button class="btn btn-more">더 보기 ↓</button>-->
-        <!--        </div>-->
         <div class="more-options">
 
           <a href="/notice" class="link"><h3>다른 여행 구경가기</h3></a>

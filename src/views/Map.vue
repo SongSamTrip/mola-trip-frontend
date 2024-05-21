@@ -1,12 +1,13 @@
 <script setup>
-import {onMounted, ref, watch} from 'vue'
+import {onMounted, ref, watch, computed } from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import KakaoMapSearch from '@/components/KakaoMapSearch.vue'
 import Chat from '@/components/Chat.vue'
 import Draggable from '@/components/List.vue'
 import {usePlaceStore} from '@/stores/placeStore'
 import {storeToRefs} from 'pinia'
-import {useUserStore} from '@/stores/userStore' // userStore를 import하는 코드 추가
+import {useUserStore} from '@/stores/userStore'
+import NewTripModal from "@/components/NewTripModal.vue"; // userStore를 import하는 코드 추가
 
 const route = useRoute()
 const router = useRouter()
@@ -22,6 +23,7 @@ let markers = []
 let bounds = null
 let infowindow = new kakao.maps.InfoWindow({zIndex: 9000})
 
+const imageLoaded = ref(false);
 
 onMounted(() => {
 
@@ -158,11 +160,6 @@ function displayInfowindow(marker, place) {
 
 
 const isDropdownVisible = ref(false);
-const trips = ref([
-  {id: 1, name: 'Trip 1'},
-  {id: 2, name: 'Trip 2'},
-  {id: 3, name: 'Trip 3'}
-]);
 
 function toggleDropdown() {
   isDropdownVisible.value = !isDropdownVisible.value;
@@ -177,6 +174,19 @@ function selectTrip(trip) {
 
 const tripCode = ref(""); // tripCode를 저장할 ref 생성
 
+const userProfileImageUrl = computed(() => {
+  return userStore.profileImageUrl || "https://robohash.org/geeknews?set=set4";
+});
+
+const showDropdown2 = ref(true);
+
+function toggleDropdown2() {
+  console.log("toggleDropdown2 called");
+  toggleDropdown2.value = !toggleDropdown2.value;
+  console.log(showDropdown2.value)
+}
+
+const showModal = ref(false);
 
 </script>
 
@@ -187,11 +197,13 @@ const tripCode = ref(""); // tripCode를 저장할 ref 생성
     >
 
       <KakaoMapSearch @update-location="handleLocationUpdate"></KakaoMapSearch>
-      <div class="profile-user-img">
-        <img :src="userStore.profileImageUrl" alt="profile-user-img" class="profile-user-img-img">
+      <div class="profile-user-img" >
+        <img @click="showModal = true" :src="userStore.profileImageUrl" alt="profile-user-img" class="profile-user-img-img">
+        <NewTripModal style="z-index: 5000" v-model:isVisible="showModal"/>
+
       </div>
 
-      <div style=" margin-left: 100px; position: absolute; top: 0; width: 1000px; display: flex; justify-content: space-evenly;">
+      <div style=" z-index: 200; margin-left: 500px; position: absolute; top: 0; width: 400px; display: flex; justify-content: space-evenly;">
 
         <nav style="background-color: rgba(255, 255, 255, 0);" id="navigation" class="site-navigation"
              role="navigation">
@@ -208,20 +220,58 @@ const tripCode = ref(""); // tripCode를 저장할 ref 생성
     <div
         style="position: absolute; top: 430px; left: 20px; width: 350px; height: 500px; z-index: 5000"
     >
-      <Chat/>
+      <Chat  s/>
     </div>
     <div style="opacity: 0.8;  border-radius: 20px; margin-top: 0px; margin-right: 20px;
  background-color: white; position: absolute; top: 20px; right: 20px; width: 300px; height: 900px; z-index: 5000;
 overflow: hidden;">
 
 
-      <Draggable></Draggable>
+      <Draggable ></Draggable>
 
     </div>
   </div>
 </template>
 
 <style scoped>
+.dropdown-menu-image{
+  position: absolute;
+  background-color: white;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+  padding: 10px;
+  display: none;
+}
+
+.dropdown-menu button {
+  margin: 5px;
+  padding: 10px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 5000;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-menu li a {
+  display: block;
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+}
+
+.dropdown-menu li a:hover {
+  background-color: #f1f1f1;
+}
+
 .profile-user-img {
   width: 50px;
   height: 50px;
@@ -229,12 +279,15 @@ overflow: hidden;">
   overflow: hidden;
   margin-left: 400px;
   margin-top: -14px;
+  z-index: 100000;
 }
 
 .profile-user-img-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  z-index: 1000;
+
 }
 
 
@@ -366,5 +419,28 @@ body {
 .btn-primary:hover {
   background: #3F72AF;
   color: #ffffff;
+}
+
+
+.profile-user-img {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 50%;  /* 이미지를 원형으로 만듦 */
+  overflow: hidden;  /* 이미지나 요소가 컨테이너 밖으로 나가지 않도록 함 */
+  transition: transform 0.3s ease;  /* 부드러운 변환 효과 */
+}
+
+.profile-user-img-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;  /* 이미지 비율을 유지하면서 컨테이너에 맞게 조정 */
+  transition: opacity 0.3s ease;  /* 부드러운 투명도 변환 효과 */
+}
+
+.profile-user-img:hover .profile-user-img-img {
+  opacity: 0.7;  /* 이미지를 약간 투명하게 만들어 클릭 유도 */
+  transform: scale(1.1);  /* 이미지를 약간 확대 */
 }
 </style>
