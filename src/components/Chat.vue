@@ -2,30 +2,57 @@
   <div class="chat">
     <div class="messages">
       <ul class="message-list" ref="messageList">
-        <li class="message-item item-primary" v-for="(message, index) in chatMessages" :key="index">
-          {{ message.memberId }} : {{ message.content }}
+        <li v-for="(message, index) in chatMessages" :key="index"
+            :class="message.memberId === user.memberId ? 'message-item item-primary' : 'message-item item-secondary'">
+          {{ message.nickname }} : {{ parseContent(message.content) }}
+          <div class="timestamp">{{ formatTimestamp(message.timestamp) }}</div>
         </li>
       </ul>
       <div class="message-input">
-        <input type="text" placeholder="Type your message..." v-model="chatStore.chatMessage"/>
-        <button type="button" class="btn" @click="send">Send</button>
-        <button type="button" class="btn" @click="subscribeToTopic">Subscribe</button>
-        <button type="button" class="btn" @click="connectWebSocket">Connect WebSocket</button>
+        <input type="text" placeholder="Type your message..." v-model="chatStore.chatMessage" @keyup.enter="send"/>
+        <button type="button" class="btn" @click="send">Send </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted, onUnmounted } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { chatStore } from '@/stores/counter';
+import { useUserStore } from '@/stores/userStore';
+import { useJwt } from '@vueuse/integrations/useJwt';
 import { Client } from '@stomp/stompjs';
+import dayjs from 'dayjs';  // Import dayjs
 
 let client = null;
-const token = "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJNb2xhVHJpcCIsInN1YiI6IkFjY2Vzc1Rva2VuIiwiZXhwIjoxNzE1MzYwMzU2LCJtZW1iZXJJZCI6MX0.DRzH5S2PJNGZVsZl3dAtPd6UU_6A3k13kFrLiElVLalYJgSiP9L-HX70RoeCRuCJ05-LDoeRyUq8dtseU5CaDg";
+const token = localStorage.getItem('authToken');
 const chatMessages = ref([]);
 
-// 메시지 리스트의 끝으로 스크롤 이동
+const userStore = useUserStore();
+const user = userStore.$state;
+
+const route = useRoute();
+const tripId = route.params.tripId; 
+
+onMounted(() => {
+  const authToken = localStorage.getItem('authToken');
+  if (!authToken) {
+    console.error('Authorization token not found');
+    return;
+  }
+
+  try {
+    const { header, payload } = useJwt(authToken);
+    const actualPayload = payload.value;
+    userStore.setUser(actualPayload.memberId, actualPayload.profileImageUrl, actualPayload.nickName);
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+  }
+
+  connectWebSocket();
+});
+
 const scrollToBottom = () => {
   nextTick(() => {
     const messageListElement = document.querySelector('.message-list');
@@ -38,7 +65,7 @@ const scrollToBottom = () => {
 const send = () => {
   if (client && client.connected) {
     client.publish({
-      destination: '/pub/chat/1',
+      destination: '/pub/chat/'+tripId,
       body: JSON.stringify({ content: chatStore.chatMessage, sender: 'User' }),
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -50,25 +77,23 @@ const send = () => {
 
 const subscribeToTopic = () => {
   if (client && client.connected) {
-    client.subscribe('/sub/chat/1', (message) => {
-      // JSON 문자열을 파싱하여 메시지 객체로 변환
+    client.subscribe('/sub/chat/'+tripId, (message) => {
       const parseMessage = JSON.parse(message.body);
       const newMessage = JSON.parse(parseMessage.content);
-      // 채팅 메시지 객체에 content만 저장하도록 변경
       chatMessages.value.push({
         memberId: parseMessage.memberId,
-        content: newMessage.content, // content 값만 사용
-        // sender: newMessage.sender // sender 정보도 유지
+        nickname: parseMessage.nickname,
+        content: newMessage.content,
+        timestamp: parseMessage.timestamp
       });
       scrollToBottom();
     }, { Authorization: `Bearer ${token}` });
 
-    // 구독이 설정되자마자 단 한 번만 이전 채팅 내역을 가져오는 GET 요청을 보냅니다.
-    fetch('http://localhost:8080/chatMessage/1', {
-      method: 'GET', // HTTP 메소드 지정
+    fetch('http://localhost:8080/chatMessage/'+tripId, {
+      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`, // 토큰을 요청 헤더에 포함
-        'Content-Type': 'application/json' // 요청의 Content-Type 지정
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
     })
     .then(response => {
@@ -79,21 +104,22 @@ const subscribeToTopic = () => {
       }
     })
     .then(data => {
-      // data 배열의 각 항목에서 content만 추출하여 새 배열 생성
       chatMessages.value = data.map(msg => ({
+        memberId: msg.memberId,
+        nickname: msg.nickname,
         content: msg.content,
-        sender: msg.sender
+        timestamp: msg.timestamp
       }));
       scrollToBottom();
     })
     .catch(error => {
       console.error('Error fetching previous messages:', error);
     });
-
   } else {
     console.error('WebSocket is not connected.');
   }
 };
+
 const connectWebSocket = () => {
   client = new Client({
     brokerURL: 'ws://localhost:8080/ws',
@@ -105,12 +131,30 @@ const connectWebSocket = () => {
     },
     reconnectDelay: 5000,
     heartbeatIncoming: 4000,
-    heartbeatOutgoing: 4000
+    heartbeatOutgoing: 4000,
+    onConnect: () => {
+      subscribeToTopic();
+    }
   });
 
   client.activate();
 };
+
+function parseContent(content) {
+  try {
+    const parsed = JSON.parse(content);
+    return parsed.content;
+  } catch (e) {
+    return content;
+  }
+}
+
+// New function to format the timestamp
+function formatTimestamp(timestamp) {
+  return dayjs(timestamp).format('MM/DD HH:mm');
+}
 </script>
+
 
 <style scoped>
 /* screen configs */
@@ -162,12 +206,12 @@ ul { list-style: none; }
 }
 
 .item-primary {
-  background-color: #f6f7f8;
+  background-color: #b5b8bb;
   color: #3c3c3e;
 }
 
 .item-secondary {
-  background-color: #5ccad7;
+  background-color: #4c5152;
   color: #fff;
 }
 
@@ -190,5 +234,13 @@ ul { list-style: none; }
   border-radius: 5px;
   border: none;
   cursor: pointer;
+}
+
+.timestamp {
+  display: block;
+  text-align: right;
+  color: #888;
+  font-size: 0.8rem;
+  margin-top: 5px;
 }
 </style>
