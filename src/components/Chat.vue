@@ -64,6 +64,13 @@ const scrollToBottom = () => {
 
 const send = () => {
   if (client && client.connected) {
+
+    const messageContent = chatStore.chatMessage.trim();
+
+    if (messageContent === '') {
+      return;
+    }
+
     client.publish({
       destination: '/pub/chat/'+tripId,
       body: JSON.stringify({ content: chatStore.chatMessage, sender: 'User' }),

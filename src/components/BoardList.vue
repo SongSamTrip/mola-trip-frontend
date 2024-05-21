@@ -6,12 +6,13 @@
       </header>
       <main class="main-content">
         <div v-for="post in posts" :key="post.id" class="post-item" @click="getDetails(post.id)">
+          <!-- <div v-for="post in posts" :key="post.id" class="post-item" @click="printPage"> -->
           <h2>{{ post.name }}</h2>
           <p>댓글 수: {{ post.commentCount }} | 좋아요 수: {{ post.likeCount }}</p>
         </div>
         <div class="pagination">
           <button @click="fetchPosts(currentPage - 1)" :disabled="currentPage <= 0">이전</button>
-          <button @click="fetchPosts(currentPage + 1)" :disabled="currentPage >= totalPages - 1">다음</button>
+          <button @click="fetchPosts(currentPage + 1)" :disabled="currentPage >= totalPages - 2">다음</button>
         </div>
       </main>
     </div>
@@ -31,6 +32,11 @@ const router = useRouter();
 onMounted(() => {
   fetchPosts(currentPage.value);
 });
+
+function printPage(){
+  console.log(currentPage);
+  console.log(totalPages);
+}
 
 async function fetchPosts(page) {
   const pageSize = 10; // 한 페이지당 항목 수 고정

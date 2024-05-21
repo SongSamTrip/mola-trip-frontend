@@ -25,8 +25,8 @@ const createTemporaryPost = () => {
 
 <template>
   <div class="board">
-    <div class="d-flex justify-content-center">
-      <router-link to="/map" class="btn-primary">Go to Map</router-link>
+    <div class="button-container">
+      <router-link to="/land" class="btn-primary">Go to Map</router-link>
       <router-link to="/tripPosts/boardList" class="btn-primary">Go to boardList</router-link>
       <button @click="createTemporaryPost" class="btn-primary">Go to boardForm</button>
     </div>

@@ -42,6 +42,17 @@
               </div>
             </li>
           </ul>
+          <div class="pagination">
+            <button
+              v-for="n in totalPages"
+              :key="n"
+              @click="fetchComments(n)"
+              :class="{ 'active-page': currentPage === n }"
+              class="page-number"
+            >
+              {{ n }}
+            </button>
+          </div>
         </div>
       </main>
     </div>
@@ -79,9 +90,10 @@ const tripName = ref('');
 const isEditing = ref(false);
 const editablePost = ref({});
 const router = useRouter();
-
 const userStore = useUserStore();
 const user = userStore.$state;
+const currentPage = ref(1);
+const totalPages = ref(0);
 
 onMounted(async () => {
   const authToken = localStorage.getItem('authToken');
@@ -101,13 +113,28 @@ onMounted(async () => {
 
     post.value = response.data;
     liked.value = post.value.like;
-    comments.value = post.value.commentDtos || [];
+    comments.value = post.value.commentDtos.content || [];
+    totalPages.value = post.value.commentDtos.totalPages;
     tripName.value = post.value.tripName;
     mainListItems.value = JSON.parse(post.value.mainList).items; // Parse mainList from the post
   } catch (error) {
     console.error('Error loading post details:', error);
   }
 });
+
+const fetchComments = async (page) => {
+  currentPage.value = page;
+  try {
+    // 서버로부터 현재 페이지의 댓글 데이터 가져오기
+    const response = await axios.get(`http://localhost:8080/tripPosts/${post.value.id}/comments?page=${page - 1}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+    });
+    comments.value = response.data.content;
+    totalPages.value = response.data.totalPages;
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+  }
+};
 
 const toggleLike = async () => {
   if (liked.value) {
@@ -138,6 +165,7 @@ const toggleLike = async () => {
 const submitComment = async () => {
   if (newComment.value.trim()) {
     try {
+      // 댓글을 서버에 저장
       const response = await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/comments`, {
         content: newComment.value
       }, {
@@ -147,7 +175,11 @@ const submitComment = async () => {
       });
 
       const savedComment = response.data;
-      comments.value.push(savedComment);
+
+      // 새 댓글 추가 후 현재 페이지의 댓글 목록을 다시 불러오기
+      fetchComments(currentPage.value);
+
+      // 입력 필드 초기화
       newComment.value = '';
     } catch (error) {
       console.error('댓글 저장 중 오류가 발생했습니다:', error);
@@ -190,10 +222,23 @@ const deleteComment = async (commentId) => {
       }
     });
     comments.value = comments.value.filter(comment => comment.id !== commentId);
+    fetchComments(currentPage.value);
   } catch (error) {
     console.error('댓글 삭제 중 오류가 발생했습니다:', error);
   }
 };
+
+const startEditComment = (comment) => {
+  editCommentId.value = comment.id;
+  editCommentContent.value = parseContent(comment.content);
+};
+
+const cancelEdit = () => {
+  editCommentId.value = null;
+  editCommentContent.value = '';
+};
+
+
 
 function updatePost(tempPostId, memberId){
   router.push({ name: 'boardForm', query: { tempPostId, memberId } });
@@ -413,6 +458,62 @@ function parseContent(content) {
   border-radius: 5px;
   display: inline-block;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.page-number {
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #f7f7f7;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.page-number:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+.active-page {
+  background-color: #3498db;
+  color: white;
+}
+
+.place-list {
+  margin-top: 20px;
+  background-color: #e6e6e6;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.place-item {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.place-item h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.place-item p {
+  font-size: 14px;
+  margin: 2px 0;
+}
+
+.place-item a {
+  color: #3498db;
+  text-decoration: none;
+}
 </style>
-
-
