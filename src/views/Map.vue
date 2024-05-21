@@ -6,11 +6,17 @@ import Chat from '@/components/Chat.vue'
 import Draggable from '@/components/List.vue'
 import {usePlaceStore} from '@/stores/placeStore'
 import {storeToRefs} from 'pinia'
+import {useUserStore} from '@/stores/userStore' // userStore를 import하는 코드 추가
+
 const route = useRoute()
 const router = useRouter()
 const mapContainer = ref(null)
 const placeStore = usePlaceStore()
 const {places} = storeToRefs(placeStore)
+
+const userStore = useUserStore()
+
+
 let map = null
 let markers = []
 let bounds = null
@@ -18,6 +24,7 @@ let infowindow = new kakao.maps.InfoWindow({zIndex: 9000})
 
 
 onMounted(() => {
+
   kakao.maps.load(() => {
     const options = {
       center: new kakao.maps.LatLng(33.450701, 126.570667),
@@ -47,7 +54,7 @@ onMounted(() => {
 })
 
 const navigateToBoard = () => {
-  router.push({ name: 'boardList' });
+  router.push({name: 'boardList'});
 }
 
 
@@ -65,7 +72,6 @@ watch(
     },
     {deep: true}
 )
-
 
 
 function displayPlaces(places) {
@@ -89,19 +95,17 @@ function displayPlaces(places) {
         // 클립보드 API를 지원하지 않는 경우
         alert('클립보드 기능을 지원하지 않는 브라우저입니다.');
       } else {
-        navigator.clipboard.writeText(place.road_address_name).then(function() {
+        navigator.clipboard.writeText(place.road_address_name).then(function () {
           alert('주소가 클립보드에 복사되었습니다.');
           // 클립보드 복사 성공 후 새 탭에서 특정 URL로 이동
-          window.open('https://map.kakao.com/link/map/' + place.id  ,'_blank');
-        }, function(err) {
+          window.open('https://map.kakao.com/link/map/' + place.id, '_blank');
+        }, function (err) {
           alert('복사 실패: ' + err);
           // 복사 실패해도 URL로 이동할지 결정 필요'
           window.open('https://example.com', '_blank');
         });
       }
     });
-
-
 
 
     kakao.maps.event.addListener(marker, 'mouseout', function () {
@@ -174,10 +178,6 @@ function selectTrip(trip) {
 const tripCode = ref(""); // tripCode를 저장할 ref 생성
 
 
-
-
-
-
 </script>
 
 <template>
@@ -185,17 +185,20 @@ const tripCode = ref(""); // tripCode를 저장할 ref 생성
     <div
         style="position: absolute; top: 0px; left: 20px; width: 350px; height: 400px; z-index: 5000"
     >
+
       <KakaoMapSearch @update-location="handleLocationUpdate"></KakaoMapSearch>
-      <!-- 버튼 추가 -->
+      <div class="profile-user-img">
+        <img :src="userStore.profileImageUrl" alt="profile-user-img" class="profile-user-img-img">
+      </div>
 
-      <div
-          style=" margin-left: 100px; position: absolute; top: 0; width: 1000px; display: flex; justify-content: space-evenly;">
+      <div style=" margin-left: 100px; position: absolute; top: 0; width: 1000px; display: flex; justify-content: space-evenly;">
 
-        <nav style="background-color: rgba(255, 255, 255, 0);" id="navigation" class="site-navigation" role="navigation">
-          <ul class="menu">
-            <li style="margin-left: 50px" class="menu-item"><a href="#">게시판</a></li>
-            <li  style="margin-left: 50px" class="menu-item"><a href="/land">여행목록</a>
-            </li>
+        <nav style="background-color: rgba(255, 255, 255, 0);" id="navigation" class="site-navigation"
+             role="navigation">
+          <ul style="margin-top: 15px" class="menu">
+            <!--            여기 추가-->
+            <li style="margin-left: 50px" class="menu-item"><a href="#" style="color: black;">게시판</a></li>
+            <li style="margin-left: 50px" class="menu-item"><a href="/land" style="color: black;">여행목록</a></li>
           </ul>
         </nav>
 
@@ -219,6 +222,22 @@ overflow: hidden;">
 </template>
 
 <style scoped>
+.profile-user-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 70%;
+  overflow: hidden;
+  margin-left: 400px;
+  margin-top: -14px;
+}
+
+.profile-user-img-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
 body {
   overflow: hidden; /* 스크롤바 제거 */
 }
@@ -259,7 +278,7 @@ body {
 
 .site-navigation li {
   color: #fff;
-  background:  rgba(255, 255, 255, 0);
+  background: rgba(255, 255, 255, 0);
   border-radius: 20px; /* 둥근 모서리 */
 
   display: block;
@@ -280,13 +299,13 @@ body {
 
 .site-navigation li:hover {
   @include transition(background, 0.2s);
-  background:  rgba(255, 255, 255, 0);
+  background: rgba(255, 255, 255, 0);
 
   cursor: pointer;
 }
 
 .site-navigation ul li ul {
-  background:  rgba(255, 255, 255, 0);
+  background: rgba(255, 255, 255, 0);
 
   visibility: hidden;
   float: left;

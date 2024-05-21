@@ -1,43 +1,33 @@
 <template>
+  <form class="login-form" style=" display: flex; justify-content: center; align-items: center; height: 90vh;">
+    <div>
+      <p class="login-text">
+        <span class="fa-stack fa-lg">
+          <i class="fa fa-circle fa-stack-2x"></i>
+          <i class="fa fa-lock fa-stack-1x"></i>
+        </span>
+      </p>
 
-  <form class="login-form" style="margin-top: 100px">
-    <p class="login-text">
+      <div class="container" style="text-align: center;">
+        <h1 style="color: white; font-size: 75px; font-family: 'Georgia', serif; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">Mola-Trip</h1>
+      </div>
 
-    <span class="fa-stack fa-lg">
-        <i class="fa fa-circle fa-stack-2x"></i>
-        <i class="fa fa-lock fa-stack-1x"></i>
-    </span>
-    </p>
-
-    <input type="email" class="login-username" autofocus="true" required="true" placeholder="Email" />
-    <input type="password" class="login-password" required="true" placeholder="Password" />
-    <div class="button-container">
-      <input type="submit" name="Login" value="Login" class="login-submit" />
-      <input type="submit" name="SignUp" value="SignUp" class="login-submit" />
-    </div>
-    <div class="button-container" :style="{ opacity: 0.9, width: formWidth + 'px', height: '50px'  }">
-
-      <!-- Kakao Login Button -->
-      <a href="http://localhost:8080/api/auth/oauth2/kakao" class="login-link">
-        <img class="sns-login" src="@/assets/kakao_small_light.png" alt="Login with Kakao" style="opacity: 1;">
-      </a>
-      <!-- Naver Login Button -->
-      <a href="http://localhost:8080/api/auth/oauth2/google" class="login-link">
-        <img class="sns-login" src="@/assets/google_small.webp" alt="Login with Google" style="opacity: 1;">
-      </a>
-      <a href="http://localhost:8080/api/auth/oauth2/google" class="login-link">
-        <img class="sns-login" src="@/assets/github_small_white.png" alt="Login with Github" style="opacity: 1;">
-      </a>
-
-      <!-- Naver Login Button -->
-      <a href="http://localhost:8080/api/auth/oauth2/naver" class="login-link">
-        <img class="sns-login" src="@/assets/naver_small.png" alt="Login with Naver" style="opacity: 1;">
-      </a>
-
+      <div class="button-container" style="opacity: 0.9; display: flex; justify-content: center; margin-top: 20px;">
+        <a href="http://localhost:8080/api/auth/oauth2/kakao" class="login-link">
+          <img class="sns-login" src="@/assets/kakao_small_light.png" alt="Login with Kakao">
+        </a>
+        <a href="http://localhost:8080/api/auth/oauth2/google" class="login-link">
+          <img class="sns-login" src="@/assets/google_small.webp" alt="Login with Google">
+        </a>
+        <a href="http://localhost:8080/api/auth/oauth2/github" class="login-link">
+          <img class="sns-login" src="@/assets/github_small_white.png" alt="Login with Github">
+        </a>
+        <a href="http://localhost:8080/api/auth/oauth2/naver" class="login-link">
+          <img class="sns-login" src="@/assets/naver_small.png" alt="Login with Naver">
+        </a>
+      </div>
     </div>
   </form>
-
-  <a href="#" class="login-forgot-pass">forgot password?</a>
   <div class="underlay-photo"></div>
   <div class="underlay-black"></div>
 </template>
