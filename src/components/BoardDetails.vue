@@ -27,7 +27,7 @@
               <div v-if="editCommentId === comment.id">
                 <input type="text" v-model="editCommentContent" class="comment-input-edit" />
                 <button @click="updateComment(comment.id)" class="save-button">저장</button>
-                <button @click="cancelEdit" class="cancel-button">취소</button>
+                <button @click="cancelEdit()" class="cancel-button">취소</button>
               </div>
               <div v-else>
                 {{ comment.memberTripPostDto.nickname }} : {{ parseContent(comment.content) }}
@@ -41,28 +41,27 @@
         </div>
       </main>
     </div>
-    <div class="trip-plans">
-      <h2>여행 계획 목록</h2>
-      <ul>
-        <li v-for="plan in tripPlans" :key="plan.tripId">
-          <label>
-            <input type="radio" :value="plan.tripId" v-model="selectedTripPlanId" />
-            {{ plan.tripName }} - 참여인원: {{ plan.totalTripMember }}명
-            <p class="dates">
-              {{ formatDate(plan.startDate) }} - {{ formatDate(plan.endDate) }}
-            </p>
-          </label>
-        </li>
-      </ul>
-    </div>
+    <div class="place-list">
+          <h2>{{ tripName }}</h2>
+          <ul>
+            <li v-for="item in mainListItems" :key="item.id" class="place-item">
+              <h4>{{ item.name }}</h4>
+              <p>{{ item.road_address }} - {{ item.address }}</p>
+              <a :href="item.url" target="_blank">More Info</a>
+              <p>Phone: {{ item.phone }}</p>
+            </li>
+          </ul>
+        </div>
   </div>
 </template>
+
 
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { useJwt } from '@vueuse/integrations/useJwt';
 import axios from '@/commons/axios';
+import { useUserStore } from '@/stores/userStore';
+import { useJwt } from '@vueuse/integrations/useJwt';
 
 const route = useRoute();
 const post = ref({});
@@ -71,11 +70,8 @@ const comments = ref([]);
 const newComment = ref('');
 const editCommentId = ref(null);
 const editCommentContent = ref('');
-const tripPlanId = ref('');
-const tripPlanName = ref('');
-const tripPlanList = ref('');
-
-import { useUserStore } from '@/stores/userStore';
+const mainListItems = ref([]);
+const tripName = ref('');
 
 const userStore = useUserStore();
 const user = userStore.$state;
@@ -88,87 +84,52 @@ onMounted(async () => {
   }
 
   try {
-    const { header, payload } = useJwt(authToken);
-    const actualPayload = payload.value;
-    userStore.setUser(actualPayload.memberId, actualPayload.profileImageUrl, actualPayload.nickName);
-  } catch (error) {
-    console.error('Error decoding JWT:', error);
-  }
+    const { payload } = useJwt(authToken);
+    userStore.setUser(payload.value.memberId, payload.value.profileImageUrl, payload.value.nickName);
 
-  try {
     const postId = route.params.tripPostId;
     const response = await axios.get(`http://localhost:8080/tripPosts/${postId}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
+      headers: { 'Authorization': `Bearer ${authToken}` }
     });
 
-    console.log(response.data)
-
     post.value = response.data;
-    liked.value = post.value.like;
+    liked.value = post.value.isLike;
     comments.value = post.value.commentDtos || [];
+    tripName.value = post.value.tripName;
+    mainListItems.value = JSON.parse(post.value.mainList).items; // Parse mainList from the post
   } catch (error) {
-    console.error('게시글 상세 정보 조회 중 오류가 발생했습니다:', error);
+    console.error('Error loading post details:', error);
   }
 });
 
 const toggleLike = async () => {
-  if (liked.value) {
-    try {
-      await axios.delete(`http://localhost:8080/tripPosts/${post.value.id}/likes`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      });
+  const endpoint = `http://localhost:8080/tripPosts/${post.value.id}/likes`;
+  const config = { headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` } };
+  
+  try {
+    if (liked.value) {
+      await axios.delete(endpoint, config);
       liked.value = false;
-    } catch (error) {
-      console.error('좋아요 취소 중 오류가 발생했습니다:', error);
-    }
-  } else {
-    try {
-      await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/likes`, {}, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      });
+    } else {
+      await axios.post(endpoint, {}, config);
       liked.value = true;
-    } catch (error) {
-      console.error('좋아요 설정 중 오류가 발생했습니다:', error);
     }
+  } catch (error) {
+    console.error('Error toggling like:', error);
   }
 };
 
 const submitComment = async () => {
-  if (newComment.value.trim()) {
-    try {
-      const response = await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/comments`, {
-        content: newComment.value
-      }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      });
-
-      const savedComment = response.data;
-      comments.value.push(savedComment);
-      newComment.value = '';
-    } catch (error) {
-      console.error('댓글 저장 중 오류가 발생했습니다:', error);
-    }
-  }
-};
-
-const deleteComment = async (commentId) => {
+  if (!newComment.value.trim()) return;
   try {
-    await axios.delete(`http://localhost:8080/tripPosts/${post.value.id}/comments/${commentId}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
-    comments.value = comments.value.filter(comment => comment.id !== commentId);
+    const response = await axios.post(`http://localhost:8080/tripPosts/${post.value.id}/comments`, 
+      { content: newComment.value }, 
+      { headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` } }
+    );
+    comments.value.push(response.data);
+    newComment.value = '';
   } catch (error) {
-    console.error('댓글 삭제 중 오류가 발생했습니다:', error);
+    console.error('Error submitting comment:', error);
   }
 };
 
@@ -208,6 +169,17 @@ const updateComment = async (commentId) => {
   }
 };
 
+const deleteComment = async (commentId) => {
+  try {
+    await axios.delete(`http://localhost:8080/tripPosts/${post.value.id}/comments/${commentId}`, 
+      { headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` } }
+    );
+    comments.value = comments.value.filter(comment => comment.id !== commentId);
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+  }
+};
+
 function parseContent(content) {
   try {
     const parsed = JSON.parse(content);
@@ -219,7 +191,6 @@ function parseContent(content) {
 </script>
 
 <style scoped>
-
 .main {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -263,11 +234,43 @@ function parseContent(content) {
   border: 1px solid #ccc;
   margin-left: 10px;
   margin-right: 10px;
-  width: 200px;
+  width: 300px; /* Adjusted for better fit */
 }
 
 .main-content {
   padding-top: 20px;
+}
+
+.place-list {
+  margin-top: 20px;
+  background-color: #e6e6e6;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.place-item {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.place-item h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.place-item p {
+  font-size: 14px;
+  margin: 2px 0;
+}
+
+.place-item a {
+  color: #3498db;
+  text-decoration: none;
 }
 
 .like-and-comments {
@@ -312,7 +315,7 @@ function parseContent(content) {
 }
 
 .comment-item {
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   padding: 8px;
   background-color: #ecf0f1;
   border-radius: 10px;
@@ -336,7 +339,7 @@ function parseContent(content) {
 }
 
 .delete-button {
-  background-color: red;
+  background-color: #e74c3c;
 }
 
 .save-button {
@@ -344,7 +347,7 @@ function parseContent(content) {
 }
 
 .cancel-button {
-  background-color: #e74c3c;
+  background-color: #95a5a6; /* More neutral for cancel action */
 }
 
 .comment-input-edit {
@@ -354,4 +357,14 @@ function parseContent(content) {
   border: 1px solid #ccc;
   margin-right: 10px;
 }
+
+.tags {
+  margin-top: 10px;
+  background-color: #e0e0e0;
+  padding: 10px;
+  border-radius: 5px;
+  display: inline-block;
+}
 </style>
+
+

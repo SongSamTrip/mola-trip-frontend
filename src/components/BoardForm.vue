@@ -1,3 +1,47 @@
+<!-- <template>
+  <div class="main">
+    <div class="container">
+      <header class="header">
+        <h1 class="logo">게시글 등록</h1>
+        <div class="search-profile">
+          <input type="text" class="search-bar" placeholder="title" v-model="title" />
+        </div>
+      </header>
+      <main class="main-content">
+        <div class="content-wrapper">
+          <form class="post-form" @submit.prevent="send">
+            <div class="editor">
+              <QuillEditor :modules="modules" 
+              toolbar="full" 
+              v-model:content="content"
+              contentType="html"
+              theme="snow"
+              style="height: 440px"/>
+            </div>
+            <button type="submit" class="publish-btn">
+              등록
+            </button>
+          </form>
+        </div>
+        <div class="tags">
+          <p>#nature, #hiking, #wildflowers</p>
+        </div>
+      </main>
+    </div>
+    <div class="trip-plans">
+      <h2>여행 계획 목록</h2>
+      <ul>
+        <li v-for="plan in tripPlans" :key="plan.id">
+          <label>
+            <input type="radio" :value="plan.id" v-model="selectedTripPlanId" />
+            {{ plan.name }}
+          </label>
+        </li>
+      </ul>
+    </div>
+  </div>
+</template> -->
+
 <template>
   <div class="main">
     <div class="container">
@@ -296,3 +340,4 @@ export default defineComponent({
   display: inline-block;
 }
 </style>
+
