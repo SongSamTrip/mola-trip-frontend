@@ -102,9 +102,7 @@ async function addItem(place) {
   });
 
   const jsonString = JSON.stringify({items: elements});
-  console.log("------------jsonString")
-  console.log(jsonString)
-  console.log("------------jsonString")
+
   const tripListHtmlDto = {
     subTripList: jsonString,
   };
@@ -115,7 +113,7 @@ async function addItem(place) {
 
   axios.put(`http://localhost:8080/api/trip-plan/sub-list/${tripId}`, tripListHtmlDto, {
     headers: {
-      'Authorization': `Bearer ${accessToken}` // Bearer 스키마를 사용하는 경우
+      'Authorization': `Bearer ${accessToken}`
     }
   })
       .then(function (response) {
@@ -157,15 +155,14 @@ async function addItem(place) {
       margin: 10px;">
       <li style="margin-left: 15px; margin-right: 15px; margin-top: 5px;" v-for="(place, index) in placesList"
           :key="index"
-          @mouseover="handleMouseOver(place)"
-          @mouseout="handleMouseOut"
           @click="sendLocation(place)"
           class="leaderboard__profile">
-        <b><span style="color: black; font-size: 13px">{{ place.place_name }}</span></b>
-        <span style="color: darkslategray; font-size: 13px">{{ place.road_address_name || place.address_name }}</span>
+        <b><span style="display: inline-block; width: 70px; color: black; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ place.place_name }}</span></b>
+        <span style="color: darkslategray; font-size: 13px;">{{place.phone}}</span>
+
         <div>
-          <button style="color: darkslategray; font-size: 11px" @click="goToMap(place.place_url)">페이지</button>
-          <button style="color: deeppink; font-size: 11px" @click="addItem(place)">추가해</button>
+          <button class="btn btn-primary btn-round-2" style="color: #fdfdfd; font-size: 11px" @click="goToMap(place.place_url)">더보기</button>
+          <button class="btn btn-primary btn-round-2" style="color: #ffffff; font-size: 11px" @click="addItem(place)">추가</button>
         </div>
       </li>
     </div>
@@ -382,5 +379,47 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #bfde85;
+}
+
+
+
+.btn {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: sans-serif;
+  cursor: pointer;
+  padding: 3px;
+  min-width: 75px;
+  border: 0px;
+  -webkit-transition: background-color 100ms linear;
+  -ms-transition: background-color 100ms linear;
+  transition: background-color 100ms linear;
+}
+
+.btn:focus, .btn.focus {
+  outline: 0;
+}
+
+.btn-round-1 {
+  border-radius: 8px;
+}
+
+.btn-round-2 {
+  border-radius: 20px;
+}
+
+.btn-primary {
+  background: #84CEEB;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #5680E9;
+  color: #ffffff;
+}
+
+.btn-success {
+  background: #2ecc71;
+  color: #ffffff;
 }
 </style>

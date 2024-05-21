@@ -7,7 +7,7 @@ import {onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 import {EventSourcePolyfill} from 'event-source-polyfill';
 import axios from 'axios';
-import { defineEmits } from 'vue';
+import {defineEmits} from 'vue';
 
 
 const route = useRoute()
@@ -15,8 +15,6 @@ const tripId = route.params.tripId;
 const authToken = localStorage.getItem('authToken');  // 인증 토큰 가져오기
 const emit = defineEmits(['updateTripCode']);
 const tripCode = ref('');
-
-
 
 
 const http = axios.create({
@@ -126,11 +124,21 @@ function updateTripListDiv(tripList, containerId) {
       newDiv.setAttribute('data-phone', place.phone);
       newDiv.setAttribute('data-x', place.x);
       newDiv.setAttribute('data-y', place.y);
-
       // 삭제 버튼 추가
       const deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Delete'; // 버튼 텍스트 설정
-      deleteButton.onclick = function(event) {
+      deleteButton.textContent = '제거'; // 버튼 텍스트 설정
+      // deleteButton.className = 'btn btn-primary btn-round-2'; // 클래스 추가
+
+      deleteButton.style.color = 'white'; // 글자 색상을 흰색으로 설정
+
+      deleteButton.style.marginLeft = '30px'; // 글자 색상을 흰색으로 설정
+      deleteButton.style.backgroundColor = '#5AB9EA'; // 배경색을 파란색으로 설정
+      deleteButton.style.border = 'none'; // 테두리 제거
+      deleteButton.style.padding = '10px 10px'; // 내부 여백 설정
+      deleteButton.style.borderRadius = '25px'; // 모서리 둥글기 설정
+      deleteButton.style.cursor = 'pointer'; // 마우스 커서를 포인터로 설정
+
+      deleteButton.onclick = function (event) {
         event.preventDefault(); // 기본 이벤트 동작 방지
         newDiv.remove(); // 현재 div를 삭제
         updateTripList('mainList', 'subList');
@@ -183,6 +191,7 @@ function updateTripList(containerIdMain, containerIdSub) {
 
     const items = container.querySelectorAll('div');
     return Array.from(items).map(item => ({
+
       class: item.className,
       id: item.id,
       name: item.getAttribute('data-name'),
@@ -247,29 +256,32 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
 <template>
 
   <div class="button-container">
-    <button @click="copyInviteCode" style="margin: 10px 0;">초대 코드 복사</button>
+    <button class="btn btn-primary btn-round-2" @click="copyInviteCode" style="margin: 10px 0;">초대 코드 복사</button>
   </div>
   <hr>
   <main>
+
     <div style="margin-top: 5px; margin-left: 5px">본리스트</div>
-    <div class="wrapper">
-      <Sortable id="mainList" ref="sortable1" :list="elements" item-key="id" :options="options" @change="logEvent"
-                @choose="logEvent"
-                @unchoose="onUnchoose($event, 'items')" @start="logEvent" @end="logEvent" @add="onAdd($event, 'items')"
-                @update="onUpdate($event, 'items')" @sort="onSort" @remove="onRemove($event, 'items')"
-                @filter="logEvent"
-                @move="logEvent" @clone="logEvent">
-        <template #item="{ element }">
-          <div :key="element.id" class="draggable">
-            {{ element.place_name }}
-          </div>
+      <div class="half">
 
-        </template>
-      </Sortable>
+        <Sortable id="mainList" ref="sortable1" :list="elements" item-key="id" :options="options" @change="logEvent"
+                  @choose="logEvent"
+                  @unchoose="onUnchoose($event, 'items')" @start="logEvent" @end="logEvent"
+                  @add="onAdd($event, 'items')"
+                  @update="onUpdate($event, 'items')" @sort="onSort" @remove="onRemove($event, 'items')"
+                  @filter="logEvent"
+                  @move="logEvent" @clone="logEvent">
+          <template #item="{ element }">
+            <div :key="element.id" class="draggable">
+              {{ element.place_name }}
+            </div>
 
-    </div>
+          </template>
+        </Sortable>
+      </div>
+
     <div style="margin-top: 5px; margin-left: 5px">부리스트</div>
-    <div class="wrapper">
+    <div class="half">
       <Sortable id="subList" ref="sortable2" :list="elements2" item-key="id" :options="options"
                 @change="onChange($event, 'items')"
                 @choose=""
@@ -297,11 +309,13 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
 </template>
 
 <style lang="css" scoped>
+
 .button-container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 main {
   max-width: 800px;
   margin: 0 auto;
@@ -313,6 +327,7 @@ main {
   margin: 10px;
   border: 1px solid #ccc;
   cursor: move;
+  border-radius: 5px; /* 둥근 모서리 */
 }
 
 .ghost {
@@ -326,10 +341,18 @@ main {
 }
 
 .wrapper {
+  display: flex; /* Flexbox 레이아웃 적용 */
+
   max-height: 400px;
   overflow-y: auto;
   padding: 10px 5px 10px 5px;
 }
+
+.half {
+  flex: 1; /* Flexbox 아이템이 공간을 동일하게 차지하도록 설정 */
+  margin-right: 5px; /* 요소 간 간격 조정 */
+}
+
 
 .settings {
   padding: 1rem;
@@ -346,5 +369,41 @@ main {
 
 .settings .range p {
   margin: 0;
+}
+
+
+.btn {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: sans-serif;
+  cursor: pointer;
+  padding: 12px;
+  min-width: 100px;
+  border: 0px;
+  -webkit-transition: background-color 100ms linear;
+  -ms-transition: background-color 100ms linear;
+  transition: background-color 100ms linear;
+}
+
+.btn:focus, .btn.focus {
+  outline: 0;
+}
+
+.btn-round-1 {
+  border-radius: 8px;
+}
+
+.btn-round-2 {
+  border-radius: 20px;
+}
+
+.btn-primary {
+  background: #5AB9EA;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #3F72AF;
+  color: #ffffff;
 }
 </style>

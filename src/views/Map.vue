@@ -27,6 +27,20 @@ onMounted(() => {
     map = new kakao.maps.Map(mapContainer.value, options)
     bounds = new kakao.maps.LatLngBounds()
     let ps = new kakao.maps.services.Places()
+
+
+    // var linePath = [
+    //   new kakao.maps.LatLng(33.498577203781664, 126.45914433997106),
+    //   new kakao.maps.LatLng(33.2579811121134,126.416704762779)
+    // ];
+    // var polyline = new kakao.maps.Polyline({
+    //   path: linePath, // 선을 구성하는 좌표배열 입니다
+    //   strokeWeight: 5, // 선의 두께 입니다
+    //   strokeColor: '#FFAE00', // 선의 색깔입니다
+    //   strokeOpacity: 0.7, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+    //   strokeStyle: 'solid' // 선의 스타일입니다
+    // });
+    // polyline.setMap(map);
   })
 
 
@@ -52,6 +66,8 @@ watch(
     {deep: true}
 )
 
+
+
 function displayPlaces(places) {
   if (!map) return // 지도가 초기화되지 않은 경우 함수를 종료합니다.
 
@@ -67,6 +83,26 @@ function displayPlaces(places) {
     kakao.maps.event.addListener(marker, 'mouseover', function () {
       displayInfowindow(marker, place)
     })
+
+    kakao.maps.event.addListener(marker, 'click', function () {
+      if (!navigator.clipboard) {
+        // 클립보드 API를 지원하지 않는 경우
+        alert('클립보드 기능을 지원하지 않는 브라우저입니다.');
+      } else {
+        navigator.clipboard.writeText(place.road_address_name).then(function() {
+          alert('주소가 클립보드에 복사되었습니다.');
+          // 클립보드 복사 성공 후 새 탭에서 특정 URL로 이동
+          window.open('https://map.kakao.com/link/map/' + place.id  ,'_blank');
+        }, function(err) {
+          alert('복사 실패: ' + err);
+          // 복사 실패해도 URL로 이동할지 결정 필요'
+          window.open('https://example.com', '_blank');
+        });
+      }
+    });
+
+
+
 
     kakao.maps.event.addListener(marker, 'mouseout', function () {
       infowindow.close()
@@ -103,22 +139,15 @@ function addMarker(position, idx) {
 }
 
 function displayInfowindow(marker, place) {
-  // Create the content for the infowindow
   var content =
-      '<div style="padding:5px;">' +
-      place.place_name +
-      '</div>' +
-      '<div style="padding:5px;">' +
-      place.road_address_name +
-      '</div>' +
-      '<div style="padding:5px;">' +
-      place.place_url +
-      '</div>' +
-      '<div style="padding:5px;">' +
-      place.phone +
-      '</div>'
+      '<div style="padding:10px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">' +
+      '<h4 style="color: #333; margin-bottom: 5px;">' + place.place_name + '</h4>' +
+      '<div style="font-size: 14px; color: #666; margin-bottom: 5px;">' + place.road_address_name + '</div>' +
+      '<div style="font-size: 14px; color: #666;">' + place.phone + '</div>' +
+      '<div style="font-size: 16px; color: #666;"><b>카카오 맵 이동시 클릭하세요!</b></div>' +
+      '</div>';
 
-  // Set the content and open the infowindow
+
   infowindow.setContent(content)
   infowindow.open(map, marker)
 }
@@ -165,16 +194,8 @@ const tripCode = ref(""); // tripCode를 저장할 ref 생성
         <nav style="background-color: rgba(255, 255, 255, 0);" id="navigation" class="site-navigation" role="navigation">
           <ul class="menu">
             <li style="margin-left: 50px" class="menu-item"><a href="#">게시판</a></li>
-            <li  style="margin-left: 50px" class="menu-item"><a href="#">여행목록</a>
-              <ul class="dropdown">
-                <li class="menu-item sub-menu"><a href="#">CSS</a></li>
-                <li class="menu-item sub-menu"><a href="#">HTML</a></li>
-                <li class="menu-item sub-menu"><a href="#">jQuery</a></li>
-                <li class="menu-item sub-menu"><a href="#">PHP</a></li>
-                <li class="menu-item sub-menu"><a href="#">WordPress</a></li>
-              </ul>
+            <li  style="margin-left: 50px" class="menu-item"><a href="/land">여행목록</a>
             </li>
-
           </ul>
         </nav>
 
@@ -290,5 +311,41 @@ body {
 
 .site-navigation ul li ul li:hover {
   background: #74b7e4;
+}
+
+
+.btn {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: sans-serif;
+  cursor: pointer;
+  padding: 12px;
+  min-width: 100px;
+  border: 0px;
+  -webkit-transition: background-color 100ms linear;
+  -ms-transition: background-color 100ms linear;
+  transition: background-color 100ms linear;
+}
+
+.btn:focus, .btn.focus {
+  outline: 0;
+}
+
+.btn-round-1 {
+  border-radius: 8px;
+}
+
+.btn-round-2 {
+  border-radius: 20px;
+}
+
+.btn-primary {
+  background: #5AB9EA;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #3F72AF;
+  color: #ffffff;
 }
 </style>
