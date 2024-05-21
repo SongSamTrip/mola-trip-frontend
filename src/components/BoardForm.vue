@@ -8,50 +8,90 @@
         </div>
       </header>
       <main class="main-content">
-        <form class="post-form" @submit.prevent="send">
-          <div class="editor">
-            <QuillEditor :modules="modules" 
-            toolbar="full" 
-            v-model:content="content"
-            contentType="html"
-            theme="snow"
-            style="height: 440px"/>
-          </div>
-
-          <button type="submit" class="publish-btn">
-            등록
-          </button>
-        </form>
+        <div class="content-wrapper">
+          <form class="post-form" @submit.prevent="send">
+            <div class="editor">
+              <QuillEditor :modules="modules" 
+              toolbar="full" 
+              v-model:content="content"
+              contentType="html"
+              theme="snow"
+              style="height: 440px"/>
+            </div>
+            <button type="submit" class="publish-btn">
+              등록
+            </button>
+          </form>
+        </div>
         <div class="tags">
           <p>#nature, #hiking, #wildflowers</p>
         </div>
       </main>
     </div>
+    <div class="trip-plans">
+      <h2>여행 계획 목록</h2>
+      <ul>
+        <li v-for="plan in tripPlans" :key="plan.tripId">
+          <label>
+            <input type="radio" :value="plan.tripId" v-model="selectedTripPlanId" />
+            {{ plan.tripName }} - 참여인원: {{ plan.totalTripMember }}명
+            <p class="dates">
+              {{ formatDate(plan.startDate) }} - {{ formatDate(plan.endDate) }}
+            </p>
+          </label>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script>
-import { ref, defineComponent  } from 'vue';
-import { useRoute, useRouter } from 'vue-router'
+import { ref, defineComponent, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { QuillEditor } from '@vueup/vue-quill';
 import ImageUploader from 'quill-image-uploader';
 import axios from '@/commons/axios';
+import dayjs from 'dayjs'; // Import dayjs
 
-export default defineComponent ({
+export default defineComponent({
   components: {
     QuillEditor,
   },
   setup() {
-    const route = useRoute(); // useRoute는 setup 내부에서 호출합니다.
+    const route = useRoute();
     const router = useRouter();
-    const tempPostId = ref(route.query.tempPostId); // ref를 사용하여 반응형으로 만듭니다.
+    const tempPostId = ref(route.query.tempPostId);
     const memberId = ref(route.query.memberId);
 
-    console.log('Temp Post ID:', tempPostId.value); // 콘솔 로그에 찍힙니다.
+    console.log('Temp Post ID:', tempPostId.value);
     console.log('MemberId :', memberId.value);
 
     const content = ref('');
     const title = ref('');
+    const tripPlans = ref([]);
+    const selectedTripPlanId = ref(null);
+
+    const fetchTripPlans = () => {
+      axios.get('http://localhost:8080/api/trip-plan/lists', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      })
+      .then(response => {
+        tripPlans.value = response.data.map(plan => ({
+          ...plan,
+          startDate: dayjs(plan.startDate).format('YYYY-MM-DD'),
+          endDate: dayjs(plan.endDate).format('YYYY-MM-DD')
+        }));
+      })
+      .catch(error => {
+        console.error('Error fetching trip plans:', error);
+      });
+    };
+
+    onMounted(() => {
+      fetchTripPlans();
+    });
 
     const send = () => {
       const postData = {
@@ -59,6 +99,7 @@ export default defineComponent ({
         memberId: memberId.value,
         name: title.value,
         content: content.value,
+        tripPlanId: selectedTripPlanId.value,
       };
 
       const data = JSON.stringify(postData);
@@ -81,43 +122,48 @@ export default defineComponent ({
     };
 
     const modules = {
-        name: 'imageUploader',
-        module: ImageUploader,
-        options: {
-          upload: file => {
-            return new Promise((resolve, reject) => {
-              const formData = new FormData();
-              formData.append("tripPostId", "1");
-              formData.append("file", file);
+      name: 'imageUploader',
+      module: ImageUploader,
+      options: {
+        upload: file => {
+          return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append("tripPostId", "1");
+            formData.append("file", file);
 
-              axios.post('http://localhost:8080/images', formData, {
-                headers: {
-                  'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                  'Content-Type': 'multipart/form-data'},
-              })
-              .then(res => {
-                console.log(res.data);
-                resolve(res.data.url);
-              })
-              .catch(err => {
-                reject("Upload failed");
-                console.error("Error:", err);
-              })
+            axios.post('http://localhost:8080/images', formData, {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                'Content-Type': 'multipart/form-data'
+              },
             })
-          }
+            .then(res => {
+              console.log(res.data);
+              resolve(res.data.url);
+            })
+            .catch(err => {
+              reject("Upload failed");
+              console.error("Error:", err);
+            })
+          })
         }
       }
-    
+    };
+
+    const formatDate = date => dayjs(date).format('YYYY-MM-DD');
+
     return {
       content,
       title,
       send,
-      modules
+      modules,
+      tripPlans,
+      selectedTripPlanId,
+      formatDate
     };
   },
 });
 </script>
-
 
 <style scoped>
 .main {
@@ -127,19 +173,23 @@ export default defineComponent ({
   background-color: #f7f7f7;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* Align items to the top */
   height: 100vh;
 }
 
-.container {
-  width: 800px;
+.container, .trip-plans {
   background-color: white;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.header {
+.container {
+  width: 800px;
+  margin-right: 20px; /* Add some space between the container and trip plans */
+}
+
+.header, .trip-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -147,7 +197,7 @@ export default defineComponent ({
   border-bottom: 1px solid #e0e0e0;
 }
 
-.logo {
+.logo, .trip-header h2 {
   font-size: 24px;
   font-weight: bold;
 }
@@ -175,9 +225,15 @@ export default defineComponent ({
   padding-top: 20px;
 }
 
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
 .post-form {
   display: flex;
   flex-direction: column;
+  flex: 1; /* Adjust flex value to manage the width */
 }
 
 .editor-container {
@@ -193,11 +249,32 @@ export default defineComponent ({
   border-radius: 5px;
   padding: 10px;
   background-color: #f7f7f7;
-  min-height: 500px; /* Ensure the editor has a minimum height */
-  height: 500px; /* Set a fixed height */
+  min-height: 500px;
+  height: 500px;
 }
 
-.publish-btn {
+.trip-plans {
+  width: 200px; /* Fixed width for trip plans */
+  margin-left: 20px; /* Space between form and trip plans */
+}
+
+.trip-plans h2 {
+  margin-bottom: 10px;
+}
+
+.trip-plans ul {
+  list-style: none;
+  padding: 0;
+}
+
+.trip-plans li {
+  margin-bottom: 10px;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.publish-btn, .trip-plan-select-btn {
   padding: 10px 20px;
   font-size: 16px;
   color: white;

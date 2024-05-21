@@ -4,8 +4,8 @@
       <header class="header">
         <h1 class="logo">게시글 상세</h1>
         <div class="search-profile">
-          <p type="text" class="search-bar">제목 : {{ post.name }}</p>
-          <p type="text" class="search-bar">글쓴이 : {{ post.nickname }}</p>
+          <p class="search-bar">제목: {{ post.name }}</p>
+          <p class="search-bar">글쓴이: {{ post.nickname }}</p>
         </div>
       </header>
       <main class="main-content">
@@ -15,8 +15,8 @@
         </div>
         <div class="like-and-comments">
           <button @click="toggleLike" class="like-button">
-            <span v-if="liked">&#9829;</span> <!-- Filled heart -->
-            <span v-else>&#9825;</span> <!-- Empty heart -->
+            <span v-if="liked">&#9829;</span>
+            <span v-else>&#9825;</span>
           </button>
           <form @submit.prevent="submitComment" class="comment-form">
             <input type="text" v-model="newComment" placeholder="댓글 입력..." class="comment-input">
@@ -27,7 +27,7 @@
               <div v-if="editCommentId === comment.id">
                 <input type="text" v-model="editCommentContent" class="comment-input-edit" />
                 <button @click="updateComment(comment.id)" class="save-button">저장</button>
-                <button @click="cancelEdit()" class="cancel-button">취소</button>
+                <button @click="cancelEdit" class="cancel-button">취소</button>
               </div>
               <div v-else>
                 {{ comment.memberTripPostDto.nickname }} : {{ parseContent(comment.content) }}
@@ -40,6 +40,20 @@
           </ul>
         </div>
       </main>
+    </div>
+    <div class="trip-plans">
+      <h2>여행 계획 목록</h2>
+      <ul>
+        <li v-for="plan in tripPlans" :key="plan.tripId">
+          <label>
+            <input type="radio" :value="plan.tripId" v-model="selectedTripPlanId" />
+            {{ plan.tripName }} - 참여인원: {{ plan.totalTripMember }}명
+            <p class="dates">
+              {{ formatDate(plan.startDate) }} - {{ formatDate(plan.endDate) }}
+            </p>
+          </label>
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -57,6 +71,9 @@ const comments = ref([]);
 const newComment = ref('');
 const editCommentId = ref(null);
 const editCommentContent = ref('');
+const tripPlanId = ref('');
+const tripPlanName = ref('');
+const tripPlanList = ref('');
 
 import { useUserStore } from '@/stores/userStore';
 
@@ -85,6 +102,9 @@ onMounted(async () => {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
       }
     });
+
+    console.log(response.data)
+
     post.value = response.data;
     liked.value = post.value.like;
     comments.value = post.value.commentDtos || [];
@@ -199,6 +219,7 @@ function parseContent(content) {
 </script>
 
 <style scoped>
+
 .main {
   font-family: Arial, sans-serif;
   margin: 0;
