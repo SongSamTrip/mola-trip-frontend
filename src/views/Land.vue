@@ -1,10 +1,10 @@
 <script setup>
 import {ref, onMounted} from 'vue';
-import { useRouter } from 'vue-router';
+import {useRouter} from 'vue-router';
 import NewTripModal from '@/components/NewTripModal.vue';
 import JoinTripModal from '@/components/JoinTripModal.vue';
-import { useJwt } from '@vueuse/integrations/useJwt'
-import { useUserStore } from '@/stores/userStore';
+import {useJwt} from '@vueuse/integrations/useJwt'
+import {useUserStore} from '@/stores/userStore';
 
 const tripPlans = ref([]);
 import axios from 'axios'; // axios를 임포트하세요
@@ -30,7 +30,7 @@ onMounted(async () => {
     }
 
     try {
-      const { header, payload } = useJwt(authToken);
+      const {header, payload} = useJwt(authToken);
 
       // ComputedRefImpl에서 값을 추출하기 위해 .value를 사용
       const actualHeader = header.value;
@@ -38,7 +38,6 @@ onMounted(async () => {
 
       const userStore = useUserStore();
       userStore.setUser(actualPayload.memberId, actualPayload.profileImageUrl, actualPayload.nickName);
-
 
 
     } catch (error) {
@@ -60,7 +59,7 @@ onMounted(async () => {
 const router = useRouter();
 
 function selectTrip(tripId) {
-  router.push({ name: 'map', params: { tripId } }); // 라우터를 통해 동적 경로로 이동
+  router.push({name: 'map', params: {tripId}}); // 라우터를 통해 동적 경로로 이동
 }
 
 
@@ -70,13 +69,21 @@ const showModal2 = ref(false);
 </script>
 
 <template>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic&display=swap" rel="stylesheet">
   <body>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Brush+Script&family=Nanum+Gothic&display=swap"
+        rel="stylesheet">
   <div class="container">
     <div class="card">
       <div class="header">
-        <h1>어디로 여행을 갈까? </h1>
+        <h1 class="jua-regular"><strong>어디로 여행을 갈까?</strong></h1>
         <div class="email-box">
-          <p style="color: #2c3e50"><text style="color: #d90f0f"><b>{{user.nickName }}</b></text> 의 여행계획</p>
+          <p style="color: #2c3e50">
+            <text style="font-size: 20px; color: #c79595" class="nanum-brush-script-regular"><b>{{ user.nickName }}</b></text>
+            의 여행계획
+          </p>
         </div>
       </div>
       <div class="workspace-list">
@@ -91,42 +98,25 @@ const showModal2 = ref(false);
           <button class="btn btn-select" @click="selectTrip(plan.tripId)">여행선택</button>
         </div>
 
-        <div class="more-options">
-          <button class="btn btn-more">더 보기 ↓</button>
-        </div>
+        <!--        <div class="more-options">-->
+        <!--          <button class="btn btn-more">더 보기 ↓</button>-->
+        <!--        </div>-->
         <div class="more-options">
 
-          <a href="/notice" class="link">다른 여행 구경가기</a>
+          <a href="/notice" class="link"><h3>다른 여행 구경가기</h3></a>
         </div>
         <div class="more-options">
-          <button @click="showModal2 = true">여행계획 참가하기</button>
-          <JoinTripModal v-model:isVisible="showModal2" />        </div>
+          <button  class="btn btn-primary btn-round-2" @click="showModal2 = true">여행계획 참가하기</button>
+          <JoinTripModal style="z-index: 4000" v-model:isVisible="showModal2"/>
+        </div>
       </div>
     </div>
     <div class="footer">
       <p>새로운 여행 계획을 만들까요?</p>
-      <button @click="showModal = true">새 여행 생성</button>
-      <NewTripModal v-model:isVisible="showModal" />
+      <button class="btn btn-primary btn-round-2" @click="showModal = true">새 여행 생성</button>
+      <NewTripModal style="z-index: 5000" v-model:isVisible="showModal"/>
     </div>
-    <div class="profile-icon">
-      <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="icon"
-      >
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-        <circle cx="9" cy="7" r="4"></circle>
-        <line x1="19" x2="19" y1="8" y2="14"></line>
-        <line x1="22" x2="16" y1="11" y2="11"></line>
-      </svg>
-    </div>
+
   </div>
   </body>
   <div class="underlay-photo"></div>
@@ -135,6 +125,19 @@ const showModal2 = ref(false);
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:100,300,400,700");
+
+.nanum-gothic-regular {
+  font-family: "Nanum Gothic", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.nanum-brush-script-regular {
+  font-family: "Nanum Brush Script", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
 
 [class*="underlay"] {
   left: 0;
@@ -208,8 +211,8 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 24px;
-  background-color: #8667d7;
-  color: white;
+  background-color: #84CEEB;
+  color: black;
   border-radius: 8px 8px 0 0;
 }
 
@@ -241,7 +244,7 @@ body {
 .workspace-icon {
   width: 48px;
   height: 48px;
-  background-color: #FFC82C;
+  background-color: #F9F7F7;
   margin-right: 16px;
 }
 
@@ -253,7 +256,7 @@ body {
 }
 
 .btn-select {
-  background-color: #6E42C1;
+  background-color: #5AB9EA;
   color: white;
 }
 
@@ -263,12 +266,12 @@ body {
 }
 
 .link {
-  color: #6E42C1;
+  color: #393E46;
   text-decoration: underline;
 }
 
 .btn-join {
-  background-color: #6E42C1;
+  background-color: #5AB9EA;
   color: white;
 }
 
@@ -296,6 +299,55 @@ body {
 
 .icon {
   color: #6E42C1;
+}
+
+
+
+:root {
+  --motion-ease: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  --motion-duration: 0.3s;
+}
+
+
+
+.btn {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: sans-serif;
+  cursor: pointer;
+  padding: 12px;
+  min-width: 100px;
+  border: 0px;
+  -webkit-transition: background-color 100ms linear;
+  -ms-transition: background-color 100ms linear;
+  transition: background-color 100ms linear;
+}
+
+.btn:focus, .btn.focus {
+  outline: 0;
+}
+
+.btn-round-1 {
+  border-radius: 8px;
+}
+
+.btn-round-2 {
+  border-radius: 20px;
+}
+
+.btn-primary {
+  background: #5AB9EA;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #3F72AF;
+  color: #ffffff;
+}
+
+.btn-success {
+  background: #2ecc71;
+  color: #ffffff;
 }
 
 </style>
