@@ -26,9 +26,11 @@ const http = axios.create({
 
 // API 호출을 수행하는 함수
 const getList = async () => {
+
   try {
     console.log("Attempting to fetch data...");
     let {data} = await http.get(`/api/trip-plan/${tripId}`);
+
     tripCode.value = data.tripCode;  // 가져온 tripCode를 저장합니다.
 
     if (data.tripListHtmlDto.mainTripList) {
@@ -254,33 +256,34 @@ const options = computed<SortableOptions | AutoScrollOptions>(() => {
 </script>
 
 <template>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
 
   <div class="button-container">
     <button class="btn btn-primary btn-round-2" @click="copyInviteCode" style="margin: 10px 0;">초대 코드 복사</button>
   </div>
-  <hr>
+  <hr role="tournament1">
   <main>
 
-    <div style="margin-top: 5px; margin-left: 5px">본리스트</div>
-      <div class="half">
+    <center><div style="margin-top: 5px; margin-left: 5px"><p><b>메인 리스트</b></p></div></center>
+    <div class="half">
 
-        <Sortable id="mainList" ref="sortable1" :list="elements" item-key="id" :options="options" @change="logEvent"
-                  @choose="logEvent"
-                  @unchoose="onUnchoose($event, 'items')" @start="logEvent" @end="logEvent"
-                  @add="onAdd($event, 'items')"
-                  @update="onUpdate($event, 'items')" @sort="onSort" @remove="onRemove($event, 'items')"
-                  @filter="logEvent"
-                  @move="logEvent" @clone="logEvent">
-          <template #item="{ element }">
-            <div :key="element.id" class="draggable">
-              {{ element.place_name }}
-            </div>
+      <Sortable id="mainList" ref="sortable1" :list="elements" item-key="id" :options="options" @change="logEvent"
+                @choose="logEvent"
+                @unchoose="onUnchoose($event, 'items')" @start="logEvent" @end="logEvent"
+                @add="onAdd($event, 'items')"
+                @update="onUpdate($event, 'items')" @sort="onSort" @remove="onRemove($event, 'items')"
+                @filter="logEvent"
+                @move="logEvent" @clone="logEvent">
+        <template #item="{ element }">
+          <div :key="element.id" class="draggable">
+            {{ element.place_name }}
+          </div>
 
-          </template>
-        </Sortable>
-      </div>
+        </template>
+      </Sortable>
+    </div>
 
-    <div style="margin-top: 5px; margin-left: 5px">부리스트</div>
+    <center><div style="margin-top: 5px; margin-left: 5px"><p><b>서브 리스트</b></p></div></center>
     <div class="half">
       <Sortable id="subList" ref="sortable2" :list="elements2" item-key="id" :options="options"
                 @change="onChange($event, 'items')"

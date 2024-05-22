@@ -100,7 +100,7 @@ const showModal2 = ref(false);
 
         <div class="more-options">
 
-          <a href="/notice" class="link"><h3>다른 여행 구경가기</h3></a>
+          <a href="/tripPosts/boardList" class="link"><h3>게시판 구경가기</h3></a>
         </div>
         <div class="more-options">
           <button  class="btn btn-primary btn-round-2" @click="showModal2 = true">여행계획 참가하기</button>

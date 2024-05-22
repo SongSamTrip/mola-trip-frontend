@@ -4,7 +4,7 @@ import {usePlaceStore} from '@/stores/placeStore'
 import axios from 'axios';
 
 const mapContainer = ref(null)
-const keyword = ref('제주도 맛집')
+const keyword = ref('해운대 송정 맛집')
 const placesList = ref([])
 const pagination = ref(null)
 let map, marker, infowindow, ps
