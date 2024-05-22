@@ -52,7 +52,13 @@ function submitNameChange() {
 function logout() {
   // 로그아웃 로직 처리
   userStore.clearUser();  // 사용자 정보 클리어
+  // localStorage에서 authToken 삭제
+  localStorage.removeItem('authToken');
+
   closeModal();  // 로그아웃 후 모달 닫기
+
+  // 사용자를 홈페이지로 리다이렉트
+  window.location.href = '/';
 }
 
 // async function submitForm() {
