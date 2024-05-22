@@ -29,7 +29,7 @@ onMounted(() => {
 
   kakao.maps.load(() => {
     const options = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667),
+      center: new kakao.maps.LatLng(35.1785969384698, 129.199700145244),
       level: 3
     }
 
@@ -37,7 +37,7 @@ onMounted(() => {
     bounds = new kakao.maps.LatLngBounds()
     let ps = new kakao.maps.services.Places()
 
-
+    // alert('메인 경로가 표시됩니다.');
     // var linePath = [
     //   new kakao.maps.LatLng(33.498577203781664, 126.45914433997106),
     //   new kakao.maps.LatLng(33.2579811121134,126.416704762779)
@@ -50,10 +50,67 @@ onMounted(() => {
     //   strokeStyle: 'solid' // 선의 스타일입니다
     // });
     // polyline.setMap(map);
+
   })
-
-
 })
+let currentPolyline = null;
+
+function showAlert() {
+
+  // alert('메인 경로가 표시됩니다.');
+  //
+  // // mainList 내부의 모든 자식 div 요소들을 선택
+  // var places = document.querySelectorAll('#mainList .draggable');
+  // var linePath = [];
+  //
+  // // 각 place의 data-x와 data-y 속성 값을 읽어 linePath 배열에 추가
+  // places.forEach(function(place) {
+  //   var x = parseFloat(place.getAttribute('data-x'));
+  //   var y = parseFloat(place.getAttribute('data-y'));
+  //   linePath.push(new kakao.maps.LatLng(y, x));
+  // });
+  //
+  // // 폴리라인 객체 생성 및 지도에 표시
+  // var polyline = new kakao.maps.Polyline({
+  //   path: linePath, // 선을 구성하는 좌표 배열
+  //   strokeWeight: 5, // 선의 두께
+  //   strokeColor: '#FFAE00', // 선의 색깔
+  //   strokeOpacity: 0.7, // 선의 불투명도
+  //   strokeStyle: 'solid' // 선의 스타일
+  // });
+  //
+  // polyline.setMap(map); // 폴리라인을 지도에 표시
+
+  alert('메인 경로가 표시됩니다.');
+
+  // mainList 내부의 모든 자식 div 요소들을 선택
+  var places = document.querySelectorAll('#mainList .draggable');
+  var linePath = [];
+
+  // 각 place의 data-x와 data-y 속성 값을 읽어 linePath 배열에 추가
+  places.forEach(function(place) {
+    var x = parseFloat(place.getAttribute('data-x'));
+    var y = parseFloat(place.getAttribute('data-y'));
+    linePath.push(new kakao.maps.LatLng(y, x));
+  });
+
+  // 이전에 그려진 폴리라인이 있다면 지도에서 제거
+  if (currentPolyline) {
+    currentPolyline.setMap(null);
+  }
+
+  // 새로운 폴리라인 객체 생성 및 지도에 표시
+  var polyline = new kakao.maps.Polyline({
+    path: linePath, // 선을 구성하는 좌표 배열
+    strokeWeight: 5, // 선의 두께
+    strokeColor: '#FFAE00', // 선의 색깔
+    strokeOpacity: 0.7, // 선의 불투명도
+    strokeStyle: 'solid' // 선의 스타일
+  });
+
+  polyline.setMap(map); // 폴리라인을 지도에 표시
+  currentPolyline = polyline; // 현재 폴리라인을 전역 변수에 저장
+}
 
 const navigateToBoard = () => {
   router.push({name: 'boardList'});
@@ -204,15 +261,17 @@ const showModal = ref(false);
 
       </div>
 
-      <div
-          style=" z-index: 200; margin-left: 500px; position: absolute; top: 0; width: 400px; display: flex; justify-content: space-evenly;">
+      <div style="z-index: 100; margin-left: 500px; position: absolute; top: 0; width: 400px; display: flex; justify-content: space-evenly;">
 
-        <nav style="background-color: rgba(255, 255, 255, 0);" id="navigation" class="site-navigation"
-             role="navigation">
-          <ul style="margin-top: 15px" class="menu">
-            <!--            여기 추가-->
-            <li style="margin-left: 50px" class="menu-item"><a href="/tripPosts/boardList" style="color: black;">게시판</a></li>
-            <li style="margin-left: 50px" class="menu-item"><a href="/land" style="color: black;">여행목록</a></li>
+        <nav style="z-index: 100; background-color: rgba(255, 255, 255, 0);" id="navigation" class="site-navigation" role="navigation">
+          <ul style="margin-top: 15px; width: 1000px" class="menu">
+            <!-- 여기 추가 -->
+            <li style="margin-left: 50px; background-color: #f0f0f0;" class="menu-item"><a href="/tripPosts/boardList" style="color: black;">게시판</a></li>
+            <li style="margin-left: 50px; background-color: #d1e7dd;" class="menu-item"><a href="/land" style="color: black;">여행목록</a></li>
+            <li style="margin-left: 50px; background-color: #b8daff;" class="menu-item">
+              <a href="#" style="color: black;" @click="showAlert()">메인경로표시</a>
+            </li>
+
           </ul>
         </nav>
 
@@ -224,7 +283,7 @@ const showModal = ref(false);
     >
       <Chat :class="{ 'disabled-background': showModal }"/>
     </div>
-    <div :class="{ 'disabled-background': showModal }" style=" border-radius: 20px; margin-top: 0px; margin-right: 20px;
+    <div  :class="{ 'disabled-background': showModal }" style=" border-radius: 20px; margin-top: 0px; margin-right: 20px;
  background-color: white; position: absolute; top: 20px; right: 20px; width: 300px; height: 900px; z-index: 500;
 overflow: hidden;">
       <Draggable></Draggable>
