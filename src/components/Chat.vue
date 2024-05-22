@@ -1,4 +1,6 @@
 <template>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
+
   <div class="chat">
     <div class="messages">
       <ul class="message-list" ref="messageList">
@@ -9,14 +11,16 @@
         </li>
       </ul>
       <div class="message-input">
-        <input type="text" placeholder="Type your message..." v-model="chatStore.chatMessage" @keyup.enter="send"/>
-        <button type="button" class="btn" @click="send">Send </button>
+        <input type="text" placeholder="메시지를 입력하세요..." v-model="chatStore.chatMessage" @keyup.enter="send"/>
+        <button type="button" class="btn btn-primary btn-round-2" @click="send">전송 </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+
+
 import { ref, nextTick, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { chatStore } from '@/stores/counter';
@@ -164,6 +168,49 @@ function formatTimestamp(timestamp) {
 
 
 <style scoped>
+.message-list {
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.btn {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: sans-serif;
+  cursor: pointer;
+  padding: 12px;
+  min-width: 60px;
+  border: 0px;
+  -webkit-transition: background-color 100ms linear;
+  -ms-transition: background-color 100ms linear;
+  transition: background-color 100ms linear;
+}
+
+.btn:focus, .btn.focus {
+  outline: 0;
+}
+
+.btn-round-1 {
+  border-radius: 8px;
+}
+
+.btn-round-2 {
+  border-radius: 30px;
+}
+
+.btn-primary {
+  background: #3498db;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #3F72AF;
+  color: #ffffff;
+}
+
+.btn-success {
+  background: #2ecc71;
+  color: #ffffff;
+}
 /* screen configs */
 * {
   box-sizing: border-box;
@@ -213,13 +260,13 @@ ul { list-style: none; }
 }
 
 .item-primary {
-  background-color: #b5b8bb;
+  background-color: #ffffff;
   color: #3c3c3e;
 }
 
 .item-secondary {
-  background-color: #4c5152;
-  color: #fff;
+  background-color: #91d1ee;
+  color: #000000;
 }
 
 /* messages input */

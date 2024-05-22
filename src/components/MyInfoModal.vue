@@ -10,11 +10,11 @@
         </button>
       </header>
       <div class="modal-body">
-        <form @submit.prevent="submitNameChange">
-          <input type="text" class="input-2" id="tripName" v-model="tripName" :placeholder="nickName || '이름 수정'">
-          <!-- 이름 수정 버튼 -->
-          <button class="btn btn-primary btn-round-2" type="submit">이름 수정</button>
-        </form>
+<!--        <form @submit.prevent="submitNameChange">-->
+<!--          <input type="text" class="input-2" id="tripName" v-model="tripName" :placeholder="nickName || '이름 수정'">-->
+<!--          &lt;!&ndash; 이름 수정 버튼 &ndash;&gt;-->
+<!--          <button class="btn btn-primary btn-round-2" type="submit">이름 수정</button>-->
+<!--        </form>-->
 
         <!-- 로그아웃 버튼은 폼 밖에 위치 -->
         <button @click="logout" class="btn btn-secondary btn-round-2">로그아웃</button>
@@ -107,8 +107,8 @@ function logout() {
 
 .modal-body {
   margin-top: 20px;
-  width: 1000px;
-  height: 1000px;
+  width: 140px;
+  height: 70px;
 }
 
 .input-2 {
