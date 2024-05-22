@@ -3,11 +3,25 @@
     <div class="container">
       <header class="header">
         <h1 class="logo">게시글 목록</h1>
-        <button @click="fetchMyPosts" class="my-posts-button">내가 쓴 글 조회</button>
+        <div class="sort-buttons">
+          <button @click="setSortField('like')" class="sort-button">
+            좋아요
+            <span v-if="sortField === 'like'">
+              <i :class="sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'"></i>
+            </span>
+          </button>
+          <button @click="setSortField('date')" class="sort-button">
+            날짜
+            <span v-if="sortField === 'date'">
+              <i :class="sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'"></i>
+            </span>
+          </button>
+          <button @click="fetchMyPosts" class="my-posts-button">내가 쓴 글 조회</button>
+        </div>
       </header>
       <main class="main-content">
         <div v-for="post in posts" :key="post.id" 
-        :class="['post-item', { 'private-post': post.tripPostStatus === 'PRIVATE' }]" 
+             :class="['post-item', { 'private-post': post.tripPostStatus === 'PRIVATE' }]" 
              @click="getDetails(post.id)">
           <div class="post-image">
             <img :src="!post.imageUrl || post.imageUrl.trim() === '' ? 'https://via.placeholder.com/100' : post.imageUrl" alt="게시글 이미지">
@@ -15,6 +29,7 @@
           <div class="post-details">
             <h2>{{ post.name }}</h2>
             <p>댓글 수: {{ post.commentCount }} | 좋아요 수: {{ post.likeCount }}</p>
+            <p>작성일: {{ formatDate(post.createdDate) }}</p>
             <p>글쓴이: {{ post.writer }}</p>
           </div>
         </div>
@@ -44,6 +59,8 @@ import axios from '@/commons/axios';
 const posts = ref([]);
 const currentPage = ref(0);
 const totalPages = ref(0);
+const sortField = ref('like'); // 초기 정렬 필드: 좋아요 수
+const sortOrder = ref('desc'); // 초기 정렬 순서: 내림차순
 const router = useRouter();
 
 onMounted(() => {
@@ -52,8 +69,9 @@ onMounted(() => {
 
 async function fetchPosts(page) {
   const pageSize = 10; // 한 페이지당 항목 수 고정
+  const sort = `${sortField.value},${sortOrder.value}`;
   try {
-    const response = await axios.get(`http://localhost:8080/tripPosts?page=${page}&size=${pageSize}`, {
+    const response = await axios.get(`http://localhost:8080/tripPosts?page=${page}&size=${pageSize}&sort=${sort}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
     });
 
@@ -65,9 +83,25 @@ async function fetchPosts(page) {
   }
 }
 
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('ko-KR') + ' ' + date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function setSortField(field) {
+  if (sortField.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField.value = field;
+    sortOrder.value = 'desc';
+  }
+  fetchPosts(0); // 정렬을 변경한 후 첫 페이지부터 다시 조회
+}
+
 async function fetchMyPosts() {
+  const sort = `${sortField.value},${sortOrder.value}`;
   try {
-    const response = await axios.get('http://localhost:8080/tripPosts/myPosts', {
+    const response = await axios.get(`http://localhost:8080/tripPosts/myPosts?sort=${sort}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
     });
 
@@ -85,6 +119,34 @@ function getDetails(tripPostId) {
 </script>
 
 <style scoped>
+
+.sort-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.sort-button {
+  margin-right: 10px;
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  position: relative;
+}
+
+.sort-button i {
+  margin-left: 5px;
+}
+
+.arrow-up::before {
+  content: '↑';
+}
+
+.arrow-down::before {
+  content: '↓';
+}
+
 .main {
   font-family: Arial, sans-serif;
   margin: 0;

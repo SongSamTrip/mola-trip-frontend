@@ -42,6 +42,7 @@
               </div>
               <div v-else>
                 {{ comment.memberTripPostDto.nickname }} : {{ parseContent(comment.content) }}
+                <span class="comment-date">- {{ formatDate(comment.createdDate) }}</span>
                 <div style="margin-top: 5px" v-if="comment.memberTripPostDto.id === user.memberId" class="comment-buttons">
                   <button @click="startEditComment(comment)" class="btn btn-primary btn-round-2" type="submit">수정</button>
                   <button @click="deleteComment(comment.id)" class="btn btn-primary2 btn-round-2" type="submit">삭제</button>
@@ -154,16 +155,23 @@ onMounted(async () => {
     });
 
     post.value = response.data;
+    post.value.content = addStyleToImages(post.value.content);
     liked.value = post.value.like;
     comments.value = post.value.commentDtos.content || [];
     totalPages.value = post.value.commentDtos.totalPages;
     tripName.value = post.value.tripName;
     mainListItems.value = JSON.parse(post.value.mainList).items; // Parse mainList from the post
-    post.value.content = addStyleToImages(post.value.content);
+
   } catch (error) {
     console.error('Error loading post details:', error);
   }
 });
+
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('ko-KR') + ' ' + date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+}
 
 function addStyleToImages(htmlContent) {
   // HTML 문자열을 DOM 요소로 변환
@@ -174,13 +182,15 @@ function addStyleToImages(htmlContent) {
   const images = doc.querySelectorAll('img');
   images.forEach(img => {
     // 이미지에 스타일 속성 추가
-    img.style.maxWidth = '100px';
-    img.style.maxHeight = '100px';
+    img.style.maxWidth = '700px';
+    img.style.maxHeight = '700px';
   });
 
   // 변경된 HTML을 문자열로 다시 변환
   return doc.body.innerHTML;
 }
+
+
 
 const fetchComments = async (page) => {
   currentPage.value = page;
@@ -959,4 +969,10 @@ a.btn:hover {
   z-index: -1;
 }
 
+.comment-date {
+  display: block;
+  font-size: 0.85em;
+  color: #95a5a6; /* 회색으로 날짜 표시 */
+  margin-top: 5px;
+}
 </style>
