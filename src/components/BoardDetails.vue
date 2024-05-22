@@ -4,12 +4,18 @@
       <header class="header">
         <h1 class="logo">게시글 상세</h1>
         <div class="search-profile">
-          <p class="search-bar">제목: {{ post.name }}</p>
-          <p class="search-bar">글쓴이: {{ post.nickname }}</p>
+          <p style="background-color: #eef; padding: 8px; border-radius: 4px; border: 1px solid #d1d1d1; margin-bottom: 10px;">
+            제목: {{ post.name }}
+          </p>
+
+          <p style="margin-left : 10px; background-color: #eef; padding: 8px; border-radius: 4px; border: 1px solid #d1d1d1; margin-bottom: 10px;">
+            글쓴이: {{ post.nickname }}
+          </p>
         </div>
+
         <div v-if="user.memberId === post.memberId && !isEditing" class="post-controls">
-          <button @click="updatePost(post.id, user.memberId)" class="edit-button">수정</button>
-          <button @click="confirmDelete()" class="delete-button">삭제</button>
+          <button style="margin-right: 10px" @click="updatePost(post.id, user.memberId)" class="btn btn-primary btn-round-2" type="submit">수정</button>
+          <button @click="confirmDelete()" class="btn btn-primary2 btn-round-2" type="submit">삭제</button>
         </div>
       </header>
       <main class="main-content">
@@ -29,15 +35,16 @@
           <ul class="comment-list">
             <li v-for="comment in comments" :key="comment.id" class="comment-item">
               <div v-if="editCommentId === comment.id">
-                <input type="text" v-model="editCommentContent" class="comment-input-edit"/>
+                <input  type="text" v-model="editCommentContent" class="comment-input-edit"/>
+
                 <button @click="updateComment(comment.id)" class="save-button">저장</button>
                 <button @click="cancelEdit()" class="cancel-button">취소</button>
               </div>
               <div v-else>
                 {{ comment.memberTripPostDto.nickname }} : {{ parseContent(comment.content) }}
-                <div v-if="comment.memberTripPostDto.id === user.memberId" class="comment-buttons">
-                  <button @click="startEditComment(comment)" class="edit-button">수정</button>
-                  <button @click="deleteComment(comment.id)" class="delete-button">삭제</button>
+                <div style="margin-top: 5px" v-if="comment.memberTripPostDto.id === user.memberId" class="comment-buttons">
+                  <button @click="startEditComment(comment)" class="btn btn-primary btn-round-2" type="submit">수정</button>
+                  <button @click="deleteComment(comment.id)" class="btn btn-primary2 btn-round-2" type="submit">삭제</button>
                 </div>
               </div>
             </li>
@@ -78,7 +85,9 @@
                     </div>
                   </div>
                   <div class="widget-49-meeting-action">
-                    <a :href="item.url" target="_blank" class="btn btn-sm btn-flash-border-primary">More Info</a>
+                    <a :href="item.url" target="_blank" style="margin : 5px; display: inline-block; text-decoration: none; color: white; background-color: #007BFF; padding: 10px 15px; border-radius: 5px; border: 1px solid transparent; transition: background-color 0.3s, color 0.3s;">
+                      More Info
+                    </a>
                   </div>
                 </div>
               </div>
@@ -98,6 +107,9 @@
     </div>
 
   </div>
+
+  <div class="underlay-photo"></div>
+  <div class="underlay-black"></div>
 </template>
 
 
@@ -324,6 +336,51 @@ function parseContent(content) {
 </script>
 
 <style scoped>
+a.btn:hover {
+  background-color: #0056b3; /* 호버 시 밝은 파란색으로 변경 */
+  color: #ffcc00; /* 호버 시 텍스트 색상 변경 */
+  border-color: #ffcc00; /* 호버 시 테두리 색상 변경 */
+}
+
+.btn-round-1 {
+  border-radius: 8px;
+}
+
+.btn-round-2 {
+  border-radius: 20px;
+}
+
+.btn-primary {
+  background: #3498db;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #3F72AF;
+  color: #ffffff;
+}
+
+.btn-success {
+  background: #2ecc71;
+  color: #ffffff;
+}
+
+.btn-primary2 {
+  background: #dc5765;
+  color: #ffffff;
+}
+
+.btn-primary2:hover {
+  background: #de2525;
+  color: #ffffff;
+}
+
+.btn-success2 {
+  background: #2ecc71;
+  color: #ffffff;
+}
+
+
 .place-list h2 {
   background-color: #84CEEB; /* 진한 파란색 */
   color: white; /* 텍스트 색상을 흰색으로 */
@@ -647,7 +704,6 @@ function parseContent(content) {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f7f7f7;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -882,4 +938,25 @@ function parseContent(content) {
   color: #3498db;
   text-decoration: none;
 }
+[class*="underlay"] {
+  left: 0;
+  min-height: 100%;
+  min-width: 100%;
+  position: fixed;
+  top: 0;
+}
+
+.underlay-photo {
+  animation: hue-rotate 6s infinite;
+  background: url('https://cdn.pixabay.com/photo/2016/12/21/07/43/korea-1922376_1280.jpg') no-repeat center center;
+  background-size: cover;
+  filter: grayscale(30%);
+  z-index: -1;
+}
+
+.underlay-black {
+  background: rgba(0, 0, 0, 0.7);
+  z-index: -1;
+}
+
 </style>

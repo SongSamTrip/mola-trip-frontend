@@ -26,19 +26,21 @@ const createTemporaryPost = () => {
 
 <template>
   <div class="board">
-    <div class="button-container">
-      <router-link to="/land" class="btn-primary">여행 선택 </router-link>
-      <router-link to="/tripPosts/boardList" class="btn-primary">Go to boardList</router-link>
-      <button @click="createTemporaryPost" class="btn-primary">Go to boardForm</button>
+    <center><div style="margin-top: 40px; " class="button-container">
+      <router-link style="margin-right: 50px" to="/land" class="btn-primary">여행 선택 </router-link>
+      <router-link style="margin-right: 50px" to="/tripPosts/boardList" class="btn-primary">게시판 목록</router-link>
+      <button  style="margin-right: 50px" @click="createTemporaryPost" class="btn-primary">글쓰기</button>
     </div>
+    </center>
     <router-view></router-view>
   </div>
 </template>
 
 
 <style scoped>
+
 .btn-primary {
-    background-color: #007BFF; /* 버튼의 배경색 설정 */
+    background-color: #5680E9; /* 버튼의 배경색 설정 */
     color: white; /* 글자색은 흰색으로 설정 */
     padding: 10px 20px; /* 상하, 좌우 패딩 설정 */
     font-size: 16px; /* 글자 크기 설정 */
@@ -52,7 +54,7 @@ const createTemporaryPost = () => {
 }
 
 .btn-primary:hover {
-    background-color: #0056b3; /* 호버 시 배경색 변경 */
+    background-color: #5680E9; /* 호버 시 배경색 변경 */
 }
 .container {
   display: flex;
