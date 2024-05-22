@@ -256,7 +256,7 @@ const showModal = ref(false);
       <div style="z-index: 100; margin-left: 500px; position: absolute; top: 0; width: 400px; display: flex; justify-content: space-evenly;">
 
         <nav style="z-index: 100; background-color: rgba(255, 255, 255, 0);" id="navigation" class="site-navigation" role="navigation">
-          <ul style="margin-top: 15px; width: 1000px" class="menu">
+          <ul style="margin-top: 15px; width: 600px" class="menu">
             <!-- 여기 추가 -->
             <li style="margin-left: 50px; background-color: #f0f0f0;" class="menu-item"><a href="/tripPosts/boardList" style="color: black;">게시판</a></li>
             <li style="margin-left: 50px; background-color: #d1e7dd;" class="menu-item"><a href="/land" style="color: black;">여행목록</a></li>

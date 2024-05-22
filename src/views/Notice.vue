@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '@/commons/axios';
+import MyInfoModal from "@/components/MyInfoModal.vue";
 
 const router = useRouter();
 
@@ -26,7 +27,7 @@ const createTemporaryPost = () => {
 <template>
   <div class="board">
     <div class="button-container">
-      <router-link to="/land" class="btn-primary">Go to Map</router-link>
+      <router-link to="/land" class="btn-primary">여행 선택 </router-link>
       <router-link to="/tripPosts/boardList" class="btn-primary">Go to boardList</router-link>
       <button @click="createTemporaryPost" class="btn-primary">Go to boardForm</button>
     </div>

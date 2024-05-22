@@ -14,9 +14,9 @@
       </header>
       <main class="main-content">
         <div v-html="post.content"></div>
-        <div class="tags">
-          <p>#nature, #hiking, #wildflowers</p>
-        </div>
+<!--        <div class="tags">-->
+<!--          <p>#nature, #hiking, #wildflowers</p>-->
+<!--        </div>-->
         <div class="like-and-comments">
           <button @click="toggleLike" class="like-button">
             <span v-if="liked">&#9829;</span>
@@ -29,7 +29,7 @@
           <ul class="comment-list">
             <li v-for="comment in comments" :key="comment.id" class="comment-item">
               <div v-if="editCommentId === comment.id">
-                <input type="text" v-model="editCommentContent" class="comment-input-edit" />
+                <input type="text" v-model="editCommentContent" class="comment-input-edit"/>
                 <button @click="updateComment(comment.id)" class="save-button">저장</button>
                 <button @click="cancelEdit()" class="cancel-button">취소</button>
               </div>
@@ -44,11 +44,11 @@
           </ul>
           <div class="pagination">
             <button
-              v-for="n in totalPages"
-              :key="n"
-              @click="fetchComments(n)"
-              :class="{ 'active-page': currentPage === n }"
-              class="page-number"
+                v-for="n in totalPages"
+                :key="n"
+                @click="fetchComments(n)"
+                :class="{ 'active-page': currentPage === n }"
+                class="page-number"
             >
               {{ n }}
             </button>
@@ -57,26 +57,56 @@
       </main>
     </div>
     <div class="place-list">
-          <h2>{{ tripName }}</h2>
-          <ul>
-            <li v-for="item in mainListItems" :key="item.id" class="place-item">
-              <h4>{{ item.name }}</h4>
-              <p>{{ item.road_address }} - {{ item.address }}</p>
-              <a :href="item.url" target="_blank">More Info</a>
-              <p>Phone: {{ item.phone }}</p>
-            </li>
-          </ul>
+        <h2 style="margin-left: 14px; font-size: 30px">{{ tripName }}</h2>
+
+      <div class="container2">
+        <div class="row">
+          <div class="col-lg-4" v-for="item in mainListItems" :key="item.id">
+            <div class="card card-margin">
+              <div class="card-header no-border">
+                <h5 class="card-title" style=" font-size: 16px">{{ item.name }}</h5>
+              </div>
+              <div class="card-body pt-0">
+                <div class="widget-49">
+                  <div class="widget-49-title-wrapper">
+                    <div class="widget-49-date-primary">
+                    </div>
+                    <div class="widget-49-meeting-info">
+                      <span class="widget-49-pro-title">{{ item.road_address }}</span>
+                      <span class="widget-49-meeting-time">{{ item.address }}</span>
+                      <span>{{ item.phone }}</span>
+                    </div>
+                  </div>
+                  <div class="widget-49-meeting-action">
+                    <a :href="item.url" target="_blank" class="btn btn-sm btn-flash-border-primary">More Info</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <!--      <ul>-->
+<!--        <li v-for="item in mainListItems" :key="item.id" class="place-item">-->
+<!--          <h4>{{ item.name }}</h4>-->
+<!--          <p class="address">{{ item.road_address }} - {{ item.address }}</p>-->
+<!--          <a :href="item.url" target="_blank" class="more-info">More Info</a>-->
+<!--          <p class="phone">Phone: {{ item.phone }}</p>-->
+<!--        </li>-->
+<!--      </ul>-->
+    </div>
+
   </div>
 </template>
 
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import {onMounted, ref} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
 import axios from '@/commons/axios';
-import { useUserStore } from '@/stores/userStore';
-import { useJwt } from '@vueuse/integrations/useJwt';
+import {useUserStore} from '@/stores/userStore';
+import {useJwt} from '@vueuse/integrations/useJwt';
 
 const route = useRoute();
 const post = ref({});
@@ -103,12 +133,12 @@ onMounted(async () => {
   }
 
   try {
-    const { payload } = useJwt(authToken);
+    const {payload} = useJwt(authToken);
     userStore.setUser(payload.value.memberId, payload.value.profileImageUrl, payload.value.nickName);
 
     const postId = route.params.tripPostId;
     const response = await axios.get(`http://localhost:8080/tripPosts/${postId}`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
+      headers: {'Authorization': `Bearer ${authToken}`}
     });
 
     post.value = response.data;
@@ -145,7 +175,7 @@ const fetchComments = async (page) => {
   try {
     // 서버로부터 현재 페이지의 댓글 데이터 가져오기
     const response = await axios.get(`http://localhost:8080/tripPosts/${post.value.id}/comments?page=${page - 1}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+      headers: {'Authorization': `Bearer ${localStorage.getItem('authToken')}`}
     });
     comments.value = response.data.content;
     totalPages.value = response.data.totalPages;
@@ -257,9 +287,8 @@ const cancelEdit = () => {
 };
 
 
-
-function updatePost(tempPostId, memberId){
-  router.push({ name: 'boardForm', query: { tempPostId, memberId } });
+function updatePost(tempPostId, memberId) {
+  router.push({name: 'boardForm', query: {tempPostId, memberId}});
 }
 
 function confirmDelete() {
@@ -270,18 +299,18 @@ function confirmDelete() {
 
 function deletePost(postId) {
   axios.delete(`http://localhost:8080/tripPosts/${postId}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      }
-    })
-    .then(() => {
-      alert("게시글이 삭제되었습니다.");
-      router.push({ name: 'boardList' });
-    })
-    .catch(error => {
-      console.error("게시글 삭제 중 오류가 발생했습니다:", error);
-      alert("게시글 삭제 중 문제가 발생했습니다.");
-    });
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  })
+      .then(() => {
+        alert("게시글이 삭제되었습니다.");
+        router.push({name: 'boardList'});
+      })
+      .catch(error => {
+        console.error("게시글 삭제 중 오류가 발생했습니다:", error);
+        alert("게시글 삭제 중 문제가 발생했습니다.");
+      });
 }
 
 function parseContent(content) {
@@ -295,6 +324,325 @@ function parseContent(content) {
 </script>
 
 <style scoped>
+.place-list h2 {
+  background-color: #84CEEB; /* 진한 파란색 */
+  color: white; /* 텍스트 색상을 흰색으로 */
+  padding: 10px 20px; /* 상하, 좌우 패딩 */
+  border-radius: 10px; /* 모서리 둥글게 */
+  margin-left: 14px; /* 왼쪽 여백 */
+  margin-right: 14px; /* 오른쪽 여백 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
+}
+
+.card-margin {
+  margin-bottom: 1rem;
+}
+
+.card {
+  border: 0;
+  box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+  -webkit-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+  -moz-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+  -ms-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+}
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 350px;
+  word-wrap: break-word;
+  background-color: #ffffff;
+  background-clip: border-box;
+  border-radius: 8px;
+}
+
+.card .card-header.no-border {
+  border: 0;
+}
+.card .card-header {
+  background: none;
+  padding: 0 0.9375rem;
+  font-weight: 500;
+
+  display: flex;
+  align-items: center;
+  min-height: 50px;
+}
+.card-header:first-child {
+  border-radius: calc(8px - 1px) calc(8px - 1px) 0 0;
+}
+
+.widget-49 .widget-49-title-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-primary {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #edf1fc;
+  width: 4rem;
+  margin-left: 10px;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-primary .widget-49-date-day {
+  color: #4e73e5;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-primary .widget-49-date-month {
+  color: #4e73e5;
+  line-height: 1;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #fcfcfd;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-secondary .widget-49-date-day {
+  color: #dde1e9;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-secondary .widget-49-date-month {
+  color: #dde1e9;
+  line-height: 1;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #e8faf8;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-success .widget-49-date-day {
+  color: #17d1bd;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-success .widget-49-date-month {
+  color: #17d1bd;
+  line-height: 1;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #ebf7ff;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-info .widget-49-date-day {
+  color: #36afff;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-info .widget-49-date-month {
+  color: #36afff;
+  line-height: 1;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: floralwhite;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-warning .widget-49-date-day {
+  color: #FFC868;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-warning .widget-49-date-month {
+  color: #FFC868;
+  line-height: 1;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-danger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #feeeef;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-danger .widget-49-date-day {
+  color: #F95062;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-danger .widget-49-date-month {
+  color: #F95062;
+  line-height: 1;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-light {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #fefeff;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-light .widget-49-date-day {
+  color: #f7f9fa;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-light .widget-49-date-month {
+  color: #f7f9fa;
+  line-height: 1;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-dark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #ebedee;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-dark .widget-49-date-day {
+  color: #394856;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-dark .widget-49-date-month {
+  color: #394856;
+  line-height: 1;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-base {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #f0fafb;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-base .widget-49-date-day {
+  color: #68CBD7;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-date-base .widget-49-date-month {
+  color: #68CBD7;
+  line-height: 1;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-meeting-info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1rem;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-meeting-info .widget-49-pro-title {
+  color: #3c4142;
+  font-size: 14px;
+}
+
+.widget-49 .widget-49-title-wrapper .widget-49-meeting-info .widget-49-meeting-time {
+  color: #B1BAC5;
+  font-size: 13px;
+}
+
+.widget-49 .widget-49-meeting-points {
+  font-weight: 400;
+  font-size: 13px;
+  margin-top: .5rem;
+}
+
+.widget-49 .widget-49-meeting-points .widget-49-meeting-item {
+  display: list-item;
+  color: #727686;
+}
+
+.widget-49 .widget-49-meeting-points .widget-49-meeting-item span {
+  margin-left: .5rem;
+}
+
+.widget-49 .widget-49-meeting-action {
+  text-align: right;
+}
+
+.widget-49 .widget-49-meeting-action a {
+  text-transform: uppercase;
+}
 .main {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -309,6 +657,14 @@ function parseContent(content) {
 .container {
   width: 800px;
   background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.container2 {
+  width: 350px;
+  background-color: white;
+  margin-left: 10px;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -352,13 +708,6 @@ function parseContent(content) {
   font-size: 14px;
 }
 
-.place-list {
-  margin-top: 20px;
-  background-color: #e6e6e6;
-  border-radius: 10px;
-  padding: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
 .place-item {
   margin-bottom: 10px;
@@ -505,7 +854,6 @@ function parseContent(content) {
 
 .place-list {
   margin-top: 20px;
-  background-color: #e6e6e6;
   border-radius: 10px;
   padding: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
