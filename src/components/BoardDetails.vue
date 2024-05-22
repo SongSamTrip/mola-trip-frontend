@@ -162,8 +162,8 @@ function addStyleToImages(htmlContent) {
   const images = doc.querySelectorAll('img');
   images.forEach(img => {
     // 이미지에 스타일 속성 추가
-    img.style.maxWidth = '700px';
-    img.style.maxHeight = '700px';
+    img.style.maxWidth = '100px';
+    img.style.maxHeight = '100px';
   });
 
   // 변경된 HTML을 문자열로 다시 변환
