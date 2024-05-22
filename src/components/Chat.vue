@@ -11,13 +11,8 @@
         </li>
       </ul>
       <div class="message-input">
-<<<<<<< HEAD
         <input type="text" placeholder="메시지를 입력하세요 ..." v-model="chatStore.chatMessage" @keyup.enter="send"/>
         <button type="button" class="btn" @click="send">전송</button>
-=======
-        <input type="text" placeholder="메시지를 입력하세요..." v-model="chatStore.chatMessage" @keyup.enter="send"/>
-        <button type="button" class="btn btn-primary btn-round-2" @click="send">전송 </button>
->>>>>>> 9b5bdaec197b57b8b0310cc5ec7bb704e4fe00ac
       </div>
     </div>
   </div>
