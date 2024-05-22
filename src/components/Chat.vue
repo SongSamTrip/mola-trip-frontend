@@ -9,8 +9,8 @@
         </li>
       </ul>
       <div class="message-input">
-        <input type="text" placeholder="Type your message..." v-model="chatStore.chatMessage" @keyup.enter="send"/>
-        <button type="button" class="btn" @click="send">Send </button>
+        <input type="text" placeholder="메시지를 입력하세요 ..." v-model="chatStore.chatMessage" @keyup.enter="send"/>
+        <button type="button" class="btn" @click="send">전송</button>
       </div>
     </div>
   </div>
@@ -73,8 +73,7 @@ const send = () => {
 
     client.publish({
       destination: '/pub/chat/'+tripId,
-      body: JSON.stringify({ content: chatStore.chatMessage, sender: 'User' }),
-      headers: { Authorization: `Bearer ${token}` }
+      body: JSON.stringify({ content: chatStore.chatMessage, memberId: user.memberId, nickname: user.nickName }),
     });
     chatStore.chatMessage = '';
   } else {
@@ -84,19 +83,23 @@ const send = () => {
 
 const subscribeToTopic = () => {
   if (client && client.connected) {
-    client.subscribe('/sub/chat/'+tripId, (message) => {
+    client.subscribe('/sub/chat/' + tripId, (message) => {
       const parseMessage = JSON.parse(message.body);
-      const newMessage = JSON.parse(parseMessage.content);
+
+      console.log(parseMessage);
+
+      // 이미 JSON 형태로 데이터가 올바르게 전송되어야 합니다.
       chatMessages.value.push({
         memberId: parseMessage.memberId,
         nickname: parseMessage.nickname,
-        content: newMessage.content,
+        content: parseMessage.content, // 이제 'd'와 같은 문자열이 올바른 JSON으로 처리됩니다.
         timestamp: parseMessage.timestamp
       });
       scrollToBottom();
-    }, { Authorization: `Bearer ${token}` });
+    });
 
-    fetch('http://localhost:8080/chatMessage/'+tripId, {
+    // 이전 메시지를 불러올 때의 처리
+    fetch('http://localhost:8080/chatMessage/' + tripId, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

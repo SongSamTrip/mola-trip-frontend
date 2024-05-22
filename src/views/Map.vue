@@ -211,7 +211,7 @@ const showModal = ref(false);
              role="navigation">
           <ul style="margin-top: 15px" class="menu">
             <!--            여기 추가-->
-            <li style="margin-left: 50px" class="menu-item"><a href="#" style="color: black;">게시판</a></li>
+            <li style="margin-left: 50px" class="menu-item"><a href="/tripPosts" style="color: black;">게시판</a></li>
             <li style="margin-left: 50px" class="menu-item"><a href="/land" style="color: black;">여행목록</a></li>
           </ul>
         </nav>

@@ -117,10 +117,28 @@ onMounted(async () => {
     totalPages.value = post.value.commentDtos.totalPages;
     tripName.value = post.value.tripName;
     mainListItems.value = JSON.parse(post.value.mainList).items; // Parse mainList from the post
+    post.value.content = addStyleToImages(post.value.content);
   } catch (error) {
     console.error('Error loading post details:', error);
   }
 });
+
+function addStyleToImages(htmlContent) {
+  // HTML 문자열을 DOM 요소로 변환
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContent, 'text/html');
+
+  // 모든 <img> 태그 찾기
+  const images = doc.querySelectorAll('img');
+  images.forEach(img => {
+    // 이미지에 스타일 속성 추가
+    img.style.maxWidth = '700px';
+    img.style.maxHeight = '700px';
+  });
+
+  // 변경된 HTML을 문자열로 다시 변환
+  return doc.body.innerHTML;
+}
 
 const fetchComments = async (page) => {
   currentPage.value = page;

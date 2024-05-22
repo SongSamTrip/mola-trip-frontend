@@ -107,9 +107,6 @@ export default defineComponent({
     const tempPostId = ref(route.query.tempPostId);
     const memberId = ref(route.query.memberId);
 
-    console.log('Temp Post ID:', tempPostId.value);
-    console.log('MemberId :', memberId.value);
-
     const content = ref('');
     const title = ref('');
     const tripPlans = ref([]);
@@ -161,7 +158,7 @@ export default defineComponent({
     const send = () => {
 
       if(selectedTripPlanId.value == null){
-        alert("씨발년아");
+        alert("어떤 여행인지 선택해야지 ?");
         return;
       }
       const postData = {

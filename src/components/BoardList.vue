@@ -6,17 +6,31 @@
       </header>
       <main class="main-content">
         <div v-for="post in posts" :key="post.id" class="post-item" @click="getDetails(post.id)">
-          <!-- <div v-for="post in posts" :key="post.id" class="post-item" @click="printPage"> -->
-          <h2>{{ post.name }}</h2>
-          <p>댓글 수: {{ post.commentCount }} | 좋아요 수: {{ post.likeCount }}</p>
+          <div class="post-image">
+            <img :src="!post.imageUrl || post.imageUrl.trim() === '' ? 'https://via.placeholder.com/100' : post.imageUrl" alt="게시글 이미지">
+          </div>
+          <div class="post-details">
+            <h2>{{ post.name }}</h2>
+            <p>댓글 수: {{ post.commentCount }} | 좋아요 수: {{ post.likeCount }}</p>
+            <p>글쓴이: {{ post.writer }}</p>
+          </div>
         </div>
         <div class="pagination">
-          <button @click="fetchPosts(currentPage - 1)" :disabled="currentPage <= 0">이전</button>
-          <button @click="fetchPosts(currentPage + 1)" :disabled="currentPage >= totalPages - 2">다음</button>
+          <button
+            v-for="n in totalPages"
+            :key="n"
+            @click="fetchPosts(n - 1)"
+            :class="{ 'active-page': currentPage === n - 1 }"
+            class="page-number"
+          >
+            {{ n }}
+          </button>
         </div>
       </main>
     </div>
   </div>
+  <div class="underlay-photo"></div>
+  <div class="underlay-black"></div>
 </template>
 
 <script setup>
@@ -44,6 +58,9 @@ async function fetchPosts(page) {
     const response = await axios.get(`http://localhost:8080/tripPosts?page=${page}&size=${pageSize}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
     });
+
+    console.log(response.data.content)
+
     posts.value = response.data.content;
     currentPage.value = response.data.number;
     totalPages.value = response.data.totalPages;
@@ -62,7 +79,6 @@ function getDetails(tripPostId) {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f7f7f7;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -95,18 +111,33 @@ function getDetails(tripPostId) {
 }
 
 .post-item {
+  display: flex;
+  align-items: center;
   border-bottom: 1px solid #ccc;
   padding-bottom: 10px;
   margin-bottom: 10px;
+  cursor: pointer;
 }
 
-.post-item h2 {
+.post-image img {
+  width: 100px; /* 이미지의 크기를 조정 */
+  height: 100px; /* 이미지의 크기를 조정 */
+  object-fit: contain;
+  object-position: center;
+  border-radius: 10px; /* 이미지 모서리를 둥글게 처리 */
+  margin-right: 15px; /* 이미지와 텍스트 간격 */
+}
+
+.post-details h2 {
   margin: 0;
+  font-size: 18px; /* 제목의 크기를 조절 */
+  color: #333;
 }
 
-.post-item p {
+.post-details p {
   color: #666;
   font-size: 14px;
+  margin: 5px 0; /* 각 텍스트 요소 간격 */
 }
 
 .pagination {
@@ -115,16 +146,44 @@ function getDetails(tripPostId) {
   margin-top: 20px;
 }
 
-.pagination button {
-  padding: 10px 20px;
-  margin: 0 10px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
+.page-number {
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
   cursor: pointer;
+  background-color: #f7f7f7;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-.pagination button:disabled {
-  color: #ccc;
-  cursor: not-allowed;
+.page-number:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+.active-page {
+  background-color: #3498db;
+  color: white;
+}
+
+[class*="underlay"] {
+  left: 0;
+  min-height: 100%;
+  min-width: 100%;
+  position: fixed;
+  top: 0;
+}
+
+.underlay-photo {
+  animation: hue-rotate 6s infinite;
+  background: url('https://cdn.pixabay.com/photo/2016/12/21/07/43/korea-1922376_1280.jpg') no-repeat center center;
+  background-size: cover;
+  filter: grayscale(30%);
+  z-index: -1;
+}
+
+.underlay-black {
+  background: rgba(0, 0, 0, 0.7);
+  z-index: -1;
 }
 </style>
