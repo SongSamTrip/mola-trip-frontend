@@ -57,41 +57,31 @@ let currentPolyline = null;
 
 function showAlert() {
 
-  // alert('메인 경로가 표시됩니다.');
-  //
-  // // mainList 내부의 모든 자식 div 요소들을 선택
-  // var places = document.querySelectorAll('#mainList .draggable');
-  // var linePath = [];
-  //
-  // // 각 place의 data-x와 data-y 속성 값을 읽어 linePath 배열에 추가
-  // places.forEach(function(place) {
-  //   var x = parseFloat(place.getAttribute('data-x'));
-  //   var y = parseFloat(place.getAttribute('data-y'));
-  //   linePath.push(new kakao.maps.LatLng(y, x));
-  // });
-  //
-  // // 폴리라인 객체 생성 및 지도에 표시
-  // var polyline = new kakao.maps.Polyline({
-  //   path: linePath, // 선을 구성하는 좌표 배열
-  //   strokeWeight: 5, // 선의 두께
-  //   strokeColor: '#FFAE00', // 선의 색깔
-  //   strokeOpacity: 0.7, // 선의 불투명도
-  //   strokeStyle: 'solid' // 선의 스타일
-  // });
-  //
-  // polyline.setMap(map); // 폴리라인을 지도에 표시
 
   alert('메인 경로가 표시됩니다.');
-
+  removeMarker()
   // mainList 내부의 모든 자식 div 요소들을 선택
   var places = document.querySelectorAll('#mainList .draggable');
   var linePath = [];
-
+  var index = 0;
   // 각 place의 data-x와 data-y 속성 값을 읽어 linePath 배열에 추가
   places.forEach(function(place) {
     var x = parseFloat(place.getAttribute('data-x'));
     var y = parseFloat(place.getAttribute('data-y'));
     linePath.push(new kakao.maps.LatLng(y, x));
+
+
+    console.log(index)
+    const position = new kakao.maps.LatLng(y, x)
+    const marker = addMarker(position, index)
+
+    bounds.extend(position)
+
+    // kakao.maps.event.addListener2(marker, 'mouseover', function () {
+    //   displayInfowindow(marker, place)
+    // })
+    index++;
+    markers.push(marker) // 새로 생성된 마커를 배열에 추가, x));
   });
 
   // 이전에 그려진 폴리라인이 있다면 지도에서 제거
@@ -148,6 +138,8 @@ function displayPlaces(places) {
     kakao.maps.event.addListener(marker, 'mouseover', function () {
       displayInfowindow(marker, place)
     })
+
+
 
     kakao.maps.event.addListener(marker, 'click', function () {
       if (!navigator.clipboard) {

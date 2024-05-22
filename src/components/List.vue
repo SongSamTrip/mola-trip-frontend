@@ -354,7 +354,10 @@ main {
 .half {
   flex: 1; /* Flexbox 아이템이 공간을 동일하게 차지하도록 설정 */
   margin-right: 5px; /* 요소 간 간격 조정 */
+  overflow-y: auto; /* 세로 스크롤바 활성화 */
+  max-height: 400px; /* 최대 높이 설정 */
 }
+
 
 
 .settings {
