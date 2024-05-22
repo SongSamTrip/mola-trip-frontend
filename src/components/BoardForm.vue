@@ -1,52 +1,13 @@
-<!-- <template>
-  <div class="main">
-    <div class="container">
-      <header class="header">
-        <h1 class="logo">게시글 등록</h1>
-        <div class="search-profile">
-          <input type="text" class="search-bar" placeholder="title" v-model="title" />
-        </div>
-      </header>
-      <main class="main-content">
-        <div class="content-wrapper">
-          <form class="post-form" @submit.prevent="send">
-            <div class="editor">
-              <QuillEditor :modules="modules" 
-              toolbar="full" 
-              v-model:content="content"
-              contentType="html"
-              theme="snow"
-              style="height: 440px"/>
-            </div>
-            <button type="submit" class="publish-btn">
-              등록
-            </button>
-          </form>
-        </div>
-        <div class="tags">
-          <p>#nature, #hiking, #wildflowers</p>
-        </div>
-      </main>
-    </div>
-    <div class="trip-plans">
-      <h2>여행 계획 목록</h2>
-      <ul>
-        <li v-for="plan in tripPlans" :key="plan.id">
-          <label>
-            <input type="radio" :value="plan.id" v-model="selectedTripPlanId" />
-            {{ plan.name }}
-          </label>
-        </li>
-      </ul>
-    </div>
-  </div>
-</template> -->
-
 <template>
   <div class="main">
     <div class="container">
       <header class="header">
         <h1 class="logo">게시글 등록</h1>
+        <select v-model="tripPostStatus" class="post-status-select">
+          <!-- DRAFT 상태는 사용자가 선택할 수 없도록 제거 -->
+          <option value="PUBLIC">공개</option>
+          <option value="PRIVATE">비공개</option>
+        </select>
         <div class="search-profile">
           <input type="text" class="search-bar" placeholder="title" v-model="title" />
         </div>
@@ -56,15 +17,13 @@
           <form class="post-form" @submit.prevent="send">
             <div class="editor">
               <QuillEditor :modules="modules" 
-              toolbar="full" 
-              v-model:content="content"
-              contentType="html"
-              theme="snow"
-              style="height: 440px"/>
+                toolbar="full" 
+                v-model:content="content"
+                contentType="html"
+                theme="snow"
+                style="height: 440px"/>
             </div>
-            <button type="submit" class="publish-btn">
-              등록
-            </button>
+            <button type="submit" class="publish-btn">등록</button>
           </form>
         </div>
         <div class="tags">
@@ -95,7 +54,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { QuillEditor } from '@vueup/vue-quill';
 import ImageUploader from 'quill-image-uploader';
 import axios from '@/commons/axios';
-import dayjs from 'dayjs'; // Import dayjs
+import dayjs from 'dayjs';
 
 export default defineComponent({
   components: {
@@ -111,6 +70,7 @@ export default defineComponent({
     const title = ref('');
     const tripPlans = ref([]);
     const selectedTripPlanId = ref(null);
+    const tripPostStatus = ref('PUBLIC'); // 기본 상태를 'PUBLIC'로 설정
 
     const fetchTripPlans = () => {
       axios.get('http://localhost:8080/api/trip-plan/lists', {
@@ -142,6 +102,8 @@ export default defineComponent({
         title.value = postData.name;
         content.value = postData.content;
         selectedTripPlanId.value = postData.tripPlanId;
+        tripPostStatus.value = postData.tripPostStatus; // 서버로부터 받은 상태를 설정
+
         // tripPlans 정보 업데이트 (선택적)
       } catch (error) {
         console.error('Error fetching post details:', error);
@@ -156,9 +118,8 @@ export default defineComponent({
     });
 
     const send = () => {
-
-      if(selectedTripPlanId.value == null){
-        alert("어떤 여행인지 선택해야지 ?");
+      if (selectedTripPlanId.value == null) {
+        alert("어떤 여행인지 선택해야 합니다.");
         return;
       }
       const postData = {
@@ -167,12 +128,10 @@ export default defineComponent({
         name: title.value,
         content: content.value,
         tripPlanId: selectedTripPlanId.value,
+        tripPostStatus: tripPostStatus.value
       };
 
-      const data = JSON.stringify(postData);
-      
-
-      console.log(data);
+      console.log("Sending data:", postData);
 
       axios.post('http://localhost:8080/tripPosts', postData, {
         headers: {
@@ -227,7 +186,8 @@ export default defineComponent({
       modules,
       tripPlans,
       selectedTripPlanId,
-      formatDate
+      formatDate,
+      tripPostStatus
     };
   },
 });

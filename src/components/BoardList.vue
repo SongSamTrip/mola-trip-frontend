@@ -3,9 +3,12 @@
     <div class="container">
       <header class="header">
         <h1 class="logo">게시글 목록</h1>
+        <button @click="fetchMyPosts" class="my-posts-button">내가 쓴 글 조회</button>
       </header>
       <main class="main-content">
-        <div v-for="post in posts" :key="post.id" class="post-item" @click="getDetails(post.id)">
+        <div v-for="post in posts" :key="post.id" 
+        :class="['post-item', { 'private-post': post.tripPostStatus === 'PRIVATE' }]" 
+             @click="getDetails(post.id)">
           <div class="post-image">
             <img :src="!post.imageUrl || post.imageUrl.trim() === '' ? 'https://via.placeholder.com/100' : post.imageUrl" alt="게시글 이미지">
           </div>
@@ -47,11 +50,6 @@ onMounted(() => {
   fetchPosts(currentPage.value);
 });
 
-function printPage(){
-  console.log(currentPage);
-  console.log(totalPages);
-}
-
 async function fetchPosts(page) {
   const pageSize = 10; // 한 페이지당 항목 수 고정
   try {
@@ -59,13 +57,25 @@ async function fetchPosts(page) {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
     });
 
-    console.log(response.data.content)
-
     posts.value = response.data.content;
     currentPage.value = response.data.number;
     totalPages.value = response.data.totalPages;
   } catch (error) {
     console.error('게시글 목록을 불러오는 중 오류가 발생했습니다:', error);
+  }
+}
+
+async function fetchMyPosts() {
+  try {
+    const response = await axios.get('http://localhost:8080/tripPosts/myPosts', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+    });
+
+    posts.value = response.data.content;
+    currentPage.value = response.data.number;
+    totalPages.value = response.data.totalPages;
+  } catch (error) {
+    console.error('내 게시물을 불러오는 중 오류가 발생했습니다:', error);
   }
 }
 
@@ -106,6 +116,16 @@ function getDetails(tripPostId) {
   font-weight: bold;
 }
 
+.my-posts-button {
+  padding: 8px 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
 .main-content {
   padding-top: 20px;
 }
@@ -119,25 +139,29 @@ function getDetails(tripPostId) {
   cursor: pointer;
 }
 
+.private-post {
+  background-color: #f2dede; /* 연한 빨간색 배경 */
+}
+
 .post-image img {
-  width: 100px; /* 이미지의 크기를 조정 */
-  height: 100px; /* 이미지의 크기를 조정 */
+  width: 100px;
+  height: 100px;
   object-fit: contain;
   object-position: center;
-  border-radius: 10px; /* 이미지 모서리를 둥글게 처리 */
-  margin-right: 15px; /* 이미지와 텍스트 간격 */
+  border-radius: 10px;
+  margin-right: 15px;
 }
 
 .post-details h2 {
   margin: 0;
-  font-size: 18px; /* 제목의 크기를 조절 */
+  font-size: 18px;
   color: #333;
 }
 
 .post-details p {
   color: #666;
   font-size: 14px;
-  margin: 5px 0; /* 각 텍스트 요소 간격 */
+  margin: 5px 0;
 }
 
 .pagination {
