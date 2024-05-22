@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watch, computed } from 'vue'
+import {onMounted, ref, watch, computed} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import KakaoMapSearch from '@/components/KakaoMapSearch.vue'
 import Chat from '@/components/Chat.vue'
@@ -7,7 +7,7 @@ import Draggable from '@/components/List.vue'
 import {usePlaceStore} from '@/stores/placeStore'
 import {storeToRefs} from 'pinia'
 import {useUserStore} from '@/stores/userStore'
-import NewTripModal from "@/components/NewTripModal.vue"; // userStore를 import하는 코드 추가
+import MyInfoModal from "@/components/MyInfoModal.vue"; // userStore를 import하는 코드 추가
 
 const route = useRoute()
 const router = useRouter()
@@ -197,19 +197,21 @@ const showModal = ref(false);
     >
 
       <KakaoMapSearch @update-location="handleLocationUpdate"></KakaoMapSearch>
-      <div class="profile-user-img" >
-        <img @click="showModal = true" :src="userStore.profileImageUrl" alt="profile-user-img" class="profile-user-img-img">
-        <NewTripModal style="z-index: 5000" v-model:isVisible="showModal"/>
+      <div class="profile-user-img">
+        <img @click="showModal = true" :src="userStore.profileImageUrl" alt="profile-user-img"
+             class="profile-user-img-img">
+        <MyInfoModal style="z-index: 5000" v-model:isVisible="showModal"/>
 
       </div>
 
-      <div style=" z-index: 200; margin-left: 500px; position: absolute; top: 0; width: 400px; display: flex; justify-content: space-evenly;">
+      <div
+          style=" z-index: 200; margin-left: 500px; position: absolute; top: 0; width: 400px; display: flex; justify-content: space-evenly;">
 
         <nav style="background-color: rgba(255, 255, 255, 0);" id="navigation" class="site-navigation"
              role="navigation">
           <ul style="margin-top: 15px" class="menu">
             <!--            여기 추가-->
-            <li style="margin-left: 50px" class="menu-item"><a href="/tripPosts" style="color: black;">게시판</a></li>
+            <li style="margin-left: 50px" class="menu-item"><a href="#" style="color: black;">게시판</a></li>
             <li style="margin-left: 50px" class="menu-item"><a href="/land" style="color: black;">여행목록</a></li>
           </ul>
         </nav>
@@ -220,24 +222,27 @@ const showModal = ref(false);
     <div
         style="position: absolute; top: 430px; left: 20px; width: 350px; height: 500px; z-index: 5000"
     >
-      <Chat  s/>
+      <Chat :class="{ 'disabled-background': showModal }"/>
     </div>
-    <div style="opacity: 0.8;  border-radius: 20px; margin-top: 0px; margin-right: 20px;
- background-color: white; position: absolute; top: 20px; right: 20px; width: 300px; height: 900px; z-index: 5000;
+    <div :class="{ 'disabled-background': showModal }" style=" border-radius: 20px; margin-top: 0px; margin-right: 20px;
+ background-color: white; position: absolute; top: 20px; right: 20px; width: 300px; height: 900px; z-index: 500;
 overflow: hidden;">
-
-
-      <Draggable ></Draggable>
+      <Draggable></Draggable>
 
     </div>
   </div>
 </template>
 
 <style scoped>
-.dropdown-menu-image{
+.disabled-background {
+  pointer-events: none; /* 포인터 이벤트 비활성화 */
+  opacity: 0.2; /* 콘텐츠를 흐리게 표시 */
+}
+
+.dropdown-menu-image {
   position: absolute;
   background-color: white;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
   padding: 10px;
   display: none;
 }
@@ -251,7 +256,7 @@ overflow: hidden;">
   position: absolute;
   background-color: #f9f9f9;
   min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 5000;
 }
 
@@ -426,21 +431,21 @@ body {
   position: relative;
   display: inline-block;
   cursor: pointer;
-  border-radius: 50%;  /* 이미지를 원형으로 만듦 */
-  overflow: hidden;  /* 이미지나 요소가 컨테이너 밖으로 나가지 않도록 함 */
-  transition: transform 0.3s ease;  /* 부드러운 변환 효과 */
+  border-radius: 50%; /* 이미지를 원형으로 만듦 */
+  overflow: hidden; /* 이미지나 요소가 컨테이너 밖으로 나가지 않도록 함 */
+  transition: transform 0.3s ease; /* 부드러운 변환 효과 */
 }
 
 .profile-user-img-img {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;  /* 이미지 비율을 유지하면서 컨테이너에 맞게 조정 */
-  transition: opacity 0.3s ease;  /* 부드러운 투명도 변환 효과 */
+  object-fit: cover; /* 이미지 비율을 유지하면서 컨테이너에 맞게 조정 */
+  transition: opacity 0.3s ease; /* 부드러운 투명도 변환 효과 */
 }
 
 .profile-user-img:hover .profile-user-img-img {
-  opacity: 0.7;  /* 이미지를 약간 투명하게 만들어 클릭 유도 */
-  transform: scale(1.1);  /* 이미지를 약간 확대 */
+  opacity: 0.7; /* 이미지를 약간 투명하게 만들어 클릭 유도 */
+  transform: scale(1.1); /* 이미지를 약간 확대 */
 }
 </style>
