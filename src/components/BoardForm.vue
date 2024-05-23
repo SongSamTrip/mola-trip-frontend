@@ -103,6 +103,9 @@ export default defineComponent({
         content.value = postData.content;
         selectedTripPlanId.value = postData.tripPlanId;
         tripPostStatus.value = postData.tripPostStatus; // 서버로부터 받은 상태를 설정
+        if(tripPostStatus.value == "DRAFT"){
+          tripPostStatus.value = "PUBLIC";
+        }
 
         // tripPlans 정보 업데이트 (선택적)
       } catch (error) {

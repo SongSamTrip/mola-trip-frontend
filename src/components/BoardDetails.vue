@@ -13,7 +13,7 @@
           </p>
         </div>
 
-        <div v-if="user.memberId === post.memberId && !isEditing" class="post-controls">
+        <div v-if="(user.memberId === post.memberId && !isEditing) || user.role == 'ROLE_ADMIN'" class="post-controls">
           <button style="margin-right: 10px" @click="updatePost(post.id, user.memberId)" class="btn btn-primary btn-round-2" type="submit">수정</button>
           <button @click="confirmDelete()" class="btn btn-primary2 btn-round-2" type="submit">삭제</button>
         </div>
@@ -43,7 +43,7 @@
               <div v-else>
                 {{ comment.memberTripPostDto.nickname }} : {{ parseContent(comment.content) }}
                 <span class="comment-date">- {{ formatDate(comment.createdDate) }}</span>
-                <div style="margin-top: 5px" v-if="comment.memberTripPostDto.id === user.memberId" class="comment-buttons">
+                <div style="margin-top: 5px" v-if="comment.memberTripPostDto.id === user.memberId || user.role === 'ROLE_ADMIN'" class="comment-buttons">
                   <button @click="startEditComment(comment)" class="btn btn-primary btn-round-2" type="submit">수정</button>
                   <button @click="deleteComment(comment.id)" class="btn btn-primary2 btn-round-2" type="submit">삭제</button>
                 </div>
@@ -147,7 +147,7 @@ onMounted(async () => {
 
   try {
     const {payload} = useJwt(authToken);
-    userStore.setUser(payload.value.memberId, payload.value.profileImageUrl, payload.value.nickName);
+    userStore.setUser(payload.value.memberId, payload.value.profileImageUrl, payload.value.nickName, payload.value.role);
 
     const postId = route.params.tripPostId;
     const response = await axios.get(`http://localhost:8080/tripPosts/${postId}`, {
