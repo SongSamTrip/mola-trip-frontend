@@ -6,7 +6,7 @@ export const useUserStore = defineStore('user', {
         memberId: null,
         profileImageUrl: '',
         nickName: '',
-        role: ''
+        role:''
     }),
     actions: {
         setUser(memberId, profileImageUrl, nickName, role) {

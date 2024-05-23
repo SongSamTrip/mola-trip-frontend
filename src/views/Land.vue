@@ -5,6 +5,7 @@ import NewTripModal from '@/components/NewTripModal.vue';
 import JoinTripModal from '@/components/JoinTripModal.vue';
 import {useJwt} from '@vueuse/integrations/useJwt'
 import {useUserStore} from '@/stores/userStore';
+import MemberListModal from '@/components/MemberListModal.vue';
 
 const tripPlans = ref([]);
 import axios from 'axios'; // axios를 임포트하세요
@@ -37,7 +38,7 @@ onMounted(async () => {
       const actualPayload = payload.value;
 
       const userStore = useUserStore();
-      userStore.setUser(actualPayload.memberId, actualPayload.profileImageUrl, actualPayload.nickName);
+      userStore.setUser(actualPayload.memberId, actualPayload.profileImageUrl, actualPayload.nickName, actualPayload.role);
 
 
     } catch (error) {
@@ -66,6 +67,39 @@ function selectTrip(tripId) {
 const showModal = ref(false);
 
 const showModal2 = ref(false);
+
+const showModal3= ref(false);
+
+
+
+
+
+const requestAdmin = async () => {
+  const secretKey = '1234';  // 비밀 키 설정 필요
+  try {
+    const token = localStorage.getItem('authToken');
+    const response = await axios.post('http://localhost:8080/api/members/admin', null, {
+      params: {
+        secretKey: secretKey
+      },
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    console.log(response.data);
+    alert('관리자 요청 성공! 다시 로그인 해주세요!');
+    clearToken();
+  } catch (error) {
+    console.error(error);
+    alert('관리자 요청 실패!');
+  }
+
+};
+
+const clearToken = () => {
+  localStorage.removeItem('authToken');  // 토큰 삭제
+  window.location.href = '/';  // 홈 페이지로 리다이렉트
+};
 </script>
 
 <template>
@@ -75,6 +109,15 @@ const showModal2 = ref(false);
   <body>
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Brush+Script&family=Nanum+Gothic&display=swap"
         rel="stylesheet">
+  <div>
+    <button @click="requestAdmin">관리자로 변신</button>
+    <button @click="clearToken">토큰 비우기</button>
+    <button class="btn btn-secondary" v-if="user.role === 'ROLE_ADMIN'" @click="showModal3 = true">회원 목록 보기</button>
+    <MemberListModal style="z-index: 4000" v-model:isVisible="showModal3"/>
+
+  </div>
+
+
   <div class="container">
     <div class="card">
       <div class="header">
