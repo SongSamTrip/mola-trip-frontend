@@ -3,6 +3,7 @@
     <div class="container">
       <header class="header">
         <h1 class="logo">게시글 목록</h1>
+        <p v-if="user.role == 'ROLE_ADMIN'" style="color: red;">관리자 모드</p>
         <div class="sort-buttons">
           <button @click="setSortField('like')" class="sort-button">
             좋아요
@@ -37,7 +38,7 @@
           <button
             v-for="n in totalPages"
             :key="n"
-            @click="fetchPosts(n - 1)"
+            @click="() => fetchPosts(n - 1)"
             :class="{ 'active-page': currentPage === n - 1 }"
             class="page-number"
           >
@@ -54,6 +55,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import {useUserStore} from '@/stores/userStore';
+import {useJwt} from '@vueuse/integrations/useJwt';
 import axios from '@/commons/axios';
 
 const posts = ref([]);
@@ -62,8 +65,30 @@ const totalPages = ref(0);
 const sortField = ref('like'); // 초기 정렬 필드: 좋아요 수
 const sortOrder = ref('desc'); // 초기 정렬 순서: 내림차순
 const router = useRouter();
+const userStore = useUserStore();
+const user = userStore.$state;
+
+const url = ref('tripPosts');
 
 onMounted(() => {
+  const authToken = localStorage.getItem('authToken');
+  if (!authToken) {
+    console.error('Authorization token not found');
+    return;
+  }
+  try {
+    const {payload} = useJwt(authToken);
+    userStore.setUser(payload.value.memberId, payload.value.profileImageUrl, payload.value.nickName, payload.value.role);
+    console.log(user.role)
+  }catch (error) {
+    console.error('Error loading post details:', error);
+  }
+
+
+  if(user.role == 'ROLE_ADMIN'){
+    url.value = 'tripPosts/admin';
+  }
+
   fetchPosts(currentPage.value);
 });
 
@@ -71,7 +96,7 @@ async function fetchPosts(page) {
   const pageSize = 10; // 한 페이지당 항목 수 고정
   const sort = `${sortField.value},${sortOrder.value}`;
   try {
-    const response = await axios.get(`http://localhost:8080/tripPosts?page=${page}&size=${pageSize}&sort=${sort}`, {
+    const response = await axios.get(`http://localhost:8080/${url.value}?page=${page}&size=${pageSize}&sort=${sort}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
     });
 
@@ -153,8 +178,9 @@ function getDetails(tripPostId) {
   padding: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
+  align-items: flex-start; /* 상단 정렬 */
+  height: 100vh; /* 전체 뷰포트 높이 */
+  overflow: hidden; /* 넘치는 내용 숨김 */
 }
 
 .container {
@@ -163,6 +189,16 @@ function getDetails(tripPostId) {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 컨테이너 내부 넘치는 내용 숨김 */
+  max-height: 90vh; /* 최대 높이 설정 */
+}
+
+.main-content {
+  flex: 1; /* 남은 공간 모두 사용 */
+  overflow-y: auto; /* 세로 스크롤 활성화 */
+  padding-top: 20px;
 }
 
 .header {
@@ -188,9 +224,6 @@ function getDetails(tripPostId) {
   font-size: 14px;
 }
 
-.main-content {
-  padding-top: 20px;
-}
 
 .post-item {
   display: flex;

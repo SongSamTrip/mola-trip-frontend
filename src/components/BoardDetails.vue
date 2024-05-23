@@ -3,6 +3,7 @@
     <div class="container">
       <header class="header">
         <h1 class="logo">게시글 상세</h1>
+        <p v-if="user.role == 'ROLE_ADMIN'" style="color: red;">관리자 모드</p>
         <div class="search-profile">
           <p style="background-color: #eef; padding: 8px; border-radius: 4px; border: 1px solid #d1d1d1; margin-bottom: 10px;">
             제목: {{ post.name }}
