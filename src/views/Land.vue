@@ -68,10 +68,7 @@ const showModal = ref(false);
 
 const showModal2 = ref(false);
 
-const showModal3= ref(false);
-
-
-
+const showModal3 = ref(false);
 
 
 const requestAdmin = async () => {
@@ -109,22 +106,23 @@ const clearToken = () => {
   <body>
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Brush+Script&family=Nanum+Gothic&display=swap"
         rel="stylesheet">
-  <div>
-    <button @click="requestAdmin">관리자로 변신</button>
-    <button @click="clearToken">토큰 비우기</button>
-    <button class="btn btn-secondary" v-if="user.role === 'ROLE_ADMIN'" @click="showModal3 = true">회원 목록 보기</button>
-    <MemberListModal style="z-index: 4000" v-model:isVisible="showModal3"/>
-
-  </div>
 
 
   <div class="container">
+    <div style="margin-bottom: 5px">
+      <button @click="requestAdmin">관리자로 전환</button>
+<!--      <button @click="clearToken">토큰 비우기</button>-->
+      <button v-if="user.role === 'ROLE_ADMIN'" @click="showModal3 = true">회원 목록 보기</button>
+      <MemberListModal style="z-index: 4000" v-model:isVisible="showModal3"/>
+
+    </div>
     <div class="card">
       <div class="header">
         <h1 class="jua-regular"><strong>어디로 여행을 갈까?</strong></h1>
         <div class="email-box">
           <p style="color: #2c3e50">
-            <text style="font-size: 20px; color: #c79595" class="nanum-brush-script-regular"><b>{{ user.nickName }}</b></text>
+            <text style="font-size: 20px; color: #c79595" class="nanum-brush-script-regular"><b>{{ user.nickName }}</b>
+            </text>
             의 여행계획
           </p>
         </div>
@@ -146,7 +144,7 @@ const clearToken = () => {
           <a href="/tripPosts/boardList" class="link"><h3>게시판 구경가기</h3></a>
         </div>
         <div class="more-options">
-          <button  class="btn btn-primary btn-round-2" @click="showModal2 = true">여행계획 참가하기</button>
+          <button class="btn btn-primary btn-round-2" @click="showModal2 = true">여행계획 참가하기</button>
           <JoinTripModal style="z-index: 4000" v-model:isVisible="showModal2"/>
         </div>
       </div>
@@ -171,12 +169,12 @@ const clearToken = () => {
   font-weight: 400;
   font-style: normal;
 }
+
 .nanum-brush-script-regular {
   font-family: "Nanum Brush Script", cursive;
   font-weight: 400;
   font-style: normal;
 }
-
 
 
 [class*="underlay"] {
@@ -342,12 +340,10 @@ body {
 }
 
 
-
 :root {
   --motion-ease: cubic-bezier(0.68, -0.6, 0.32, 1.6);
   --motion-duration: 0.3s;
 }
-
 
 
 .btn {
