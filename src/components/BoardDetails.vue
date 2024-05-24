@@ -717,8 +717,9 @@ a.btn:hover {
   padding: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
+  align-items: flex-start; /* 상단 정렬 */
+  height: 100vh; /* 전체 뷰포트 높이 */
+  overflow: hidden; /* 넘치는 내용 숨김 */
 }
 
 .container {
@@ -727,7 +728,12 @@ a.btn:hover {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 컨테이너 내부 넘치는 내용 숨김 */
+  max-height: 90vh; /* 최대 높이 설정 */
 }
+
 .container2 {
   width: 350px;
   background-color: white;
@@ -762,9 +768,10 @@ a.btn:hover {
 }
 
 .main-content {
+  flex: 1; /* 남은 공간 모두 사용 */
+  overflow-y: auto; /* 세로 스크롤 활성화 */
   padding-top: 20px;
 }
-
 .edit-content {
   width: 100%;
   height: 300px;
